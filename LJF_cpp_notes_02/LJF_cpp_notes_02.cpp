@@ -234,6 +234,138 @@ static_assert(sizeof(void*) == 8, "must run on x64");
 // 
 //
 
+
+//
+//面向对象，写好一个类 
+//
+
+//
+//设计思想，抽象和封装
+// 
+//即使是C，也能用结构体实现抽象和封装，不一定需要面向对象
+// 
+//继承
+// 主要是为了重用代码，有多态、虚函数、重载等
+// 
+//实现原则，建议
+// 设计类时尽量少用继承和虚函数
+// 控制继承层次，最好是只有两层，超过三层就增加了复杂度
+// 类应尽量简单那，负责单一功能；若出现多功能混合在一起，应该拆分为多个小类
+// 最好不要嵌套类，高内聚必然意味着强耦合，应该使用命名空间，将内部类提出来
+// 
+//编码准则
+// C++11，final（不是关键字，是标识符）显示禁用继承
+// class DemoClass final { };
+// 必须使用继承时，建议只用public，其他的继承关系让类关系变得复杂，也不常用
+// 四大函数，构造、析构、拷贝构造、拷贝赋值，C++11引入和右值rvalue和转移move，多出了转移构造和转移赋值
+// （题外话：补充
+// 何为左值？能用取址符号 & 取出地址的皆为左值，剩下的都是右值。匿名变量一律属于右值。
+// 右值引用也是引用的一种，参数类型为右值引用的函数只能接受右值参数，但不包括模板函数
+int i = 1; // i 是左值，1 是右值
+int GetZero(){
+	int zero = 0;
+	return zero;
+}
+//j 是左值，GetZero() 是右值，因为返回值存在于寄存器中
+int j = GetZero();
+//s 是左值，string("no name") 是匿名变量，是右值
+std::string s = std::string("no name");
+// 移动构造函数是参数类型为右值引用的拷贝构造函数
+// std::move() 能把左值强制转换为右值。
+// 题外话完)
+// 六大函数如果不写，编译期会自动生成默认实现，可以用 =default 形式显示的表示出来
+class DemoClass final
+{
+public:
+	DemoClass() = default;  // 明确告诉编译器，使用默认实现
+	~DemoClass() = default;  // 明确告诉编译器，使用默认实现
+};
+// 还可以用 =delete 形式明确禁用某个函数形式，但不限于基本函数
+// 例如，禁止对象拷贝，可以禁用拷贝构造和拷贝赋值
+class DemoClass1 final
+{
+public:
+	DemoClass1(const DemoClass1&) = delete;              // 禁止拷贝构造
+	DemoClass1& operator=(const DemoClass1&) = delete;  // 禁止拷贝赋值
+};
+// C++有隐式构造和隐式转型，在单参数的构造函数，为了防止意外的类型转换，可以用explicit，禁止隐式转换
+// class DemoClass2 final
+// {
+// public:
+// 	explicit DemoClass2(const std::string_type& str)  // 显式单参构造函数
+// 	{
+// 		//...
+// 	}
+// 	explicit operator bool()                  // 显式转型为bool
+// 	{
+// 		//...
+// 	}
+// };
+//
+
+//
+//常用技巧
+// 
+//委托构造
+// 当类有多个不同形式构造，初始化成员有大量重复代码，可以在一个构造中初始化，其他构造函数都调用它
+// 这比把初始化工作封装到一个init()函数中再分别调用更好，提高了效率和可读性
+// class DemoDelegating final
+// {
+// private:
+// 	int a;                              // 成员变量
+// public:
+// 	DemoDelegating(int x) : a(x)        // 基本的构造函数
+// 	{}
+// 
+// 	DemoDelegating() :                 // 无参数的构造函数
+// 		DemoDelegating(0)               // 给出默认值，委托给第一个构造函数
+// 	{}
+// 
+// 	DemoDelegating(const std::string& s) : // 字符串参数构造函数
+// 		DemoDelegating(stoi(s))        // 转换成整数，再委托给第一个构造函数
+// 	{}
+// };
+// 
+//成员变量初始化
+// 可以直接将类成员变量在声明时赋值，更易读，也消除了遗漏成员导致未初始化的隐患
+// 
+//类型别名
+// C++11扩展了using的用法，增加了typedef能力，定义类型别名（常用，这样在修改某常用类型时，就可以只变动定义，不需要大量改代码）
+using uint_t = unsigned int;        // using别名
+typedef unsigned int uint_t;      // 等价的typedef
+// 很多外部类型命名很长，可以用using来简化，写代码也方便
+// class DemoClass final
+// {
+// public:
+// 	using this_type = DemoClass;          // 给自己也起个别名
+// 	using kafka_conf_type = KafkaConfig;        // 外部类起别名
+// 
+// public:
+// 	using string_type = std::string;            // 字符串类型别名
+// 	using uint32_type = uint32_t;              // 整数类型别名
+// 
+// 	using set_type = std::set<int>;          // 集合类型别名
+// 	using vector_type = std::vector<std::string>;// 容器类型别名
+// 
+// private:
+// 	string_type     m_name = "tom";              // 使用类型别名声明变量
+// 	uint32_type     m_age = 23;                  // 使用类型别名声明变量
+// 	set_type        m_books;                      // 使用类型别名声明变量
+// 
+// private:
+// 	kafka_conf_type m_conf;                       // 使用类型别名声明变量
+// };
+// 
+//
+
+//
+//其他建议
+// 
+//C++中不要用typedef struct { } xxx;这样传统的C做法定义结构体
+// 
+//现在更推荐用*.hpp的方式实现类全部功能，比如boost
+//
+
 int main()
 {
 	std::cout << "Hello World!\n";
