@@ -32,6 +32,8 @@
 //
 //
 
+
+
 //
 //code style
 // 
@@ -61,8 +63,132 @@
 //检查工具
 // cpplint
 //
+//
+
+
+
+//
+//预处理 宏定义 条件编译
+//
+
+//
+//预处理阶段是将源码改造，包括宏展开和模板实例化等
+//虽然在同一个文件中，#开头的预处理指令不受C++语法规则约束
+#                              // 预处理空行
+#if __linux__                  // 预处理检查宏是否存在
+#   define HAS_LINUX    1      // 宏定义，有缩进
+#endif                         // 预处理条件语句结束
+#                              // 预处理空行
+//编译器可以不编译链接，只输出预处理后的代码
+// g++ test.cpp -E -o a.cxx
+//
+
+//
+//包含文件#include
+// 不光是包含头文件（只是最常用），而是可以包含任意文件
+// 不做检查，将数据合并到源文件，所以为了防止重复包含，通常加入Include Guard
+//#ifndef _XXX_H_INCLUDED_
+//#define _XXX_H_INCLUDED_
+// 头文件内容
+//#endif // _XXX_H_INCLUDED_
+// 
+//除了头文件，还可以编写一些代码片段，存进*.inc文件，然后有选择地加载，实现源码级的抽象
+//甚至不只在文件头使用
+//例如
+static uint32_t  calc_table[] = {  // 非常大的一个数组，有几十行
+	0x00000000, 0x77073096, 0xee0e612c, 0x990951ba,
+	0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
+	0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988,
+	0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91,
+	//...放在文件里有碍阅读
+};
+//可以把数值单独拿出来放到文件中，再用include替换
+//static uint32_t  calc_table[] = {
+//#  include "calc_values.inc"        // 非常大的一个数组，细节被隐藏
+//};
+//
+
+//
+//宏定义#define
+// 
+//因为宏的展开、替换发生在预处理阶段，不涉及函数调用、参数传递、指针寻址，没有任何运行期的效率损失，
+//所以对于一些调用频繁的小代码片段来说，用宏来封装的效果比 inline 关键字要更好（inline发生在编译期），因为它真的是源码级别的无条件内联。
+//但也要注意，这意味着宏定义不会进行类型检查等安全措施
+//示例（不加分号是为了使用时后面加分号，符合代码的编写和阅读习惯
+#define proj_tolower(c) ((c >= 'A' && c <= 'Z') ? (c | 0x20) : c)
+#define proj_toupper(c) ((c >= 'a' && c <= 'z') ? (c & -0x20) : c)
+#define proj_memzero(buf,n) (void) memset(buf,0,n)
+//宏没有作用域概念，全局生效
+// 所以对于一些简化代码，起临时作用的宏，用完尽快用#undef取消定义，避免冲突
+void 
+test() 
+{
+#define CUBE(a) (a) * (a) * (a)
+	std::cout << CUBE(10) << std::endl;
+	//使用若干次
+#undef CUBE
+}
+//用宏定义常量（也不能滥用，还可用enum和const）
+#define MAX_BUF_LEN    65535
+#define VERSION        "1.0.1"
+//发挥文本替换功能
+#define BEGIN_NAMESPACE(x) namespace x {
+#define END_NAMESPACE(x) }
+BEGIN_NAMESPACE(my_space)
+//...类和方法等
+END_NAMESPACE(my_space)
+//形式更醒目
+// 
+
+//
+//条件编译#if/#else/#endif
+// 可根据定义过的宏判断编译环境，产生当前环境最合适的代码，例如跨平台编译
+// 
+//记住一个宏 __cplusplus，标记了C++语言版本号，判断是C还是C++
+#ifdef __cplusplus                      // 定义了这个宏就是在用C++编译
+extern "C" {                        // 函数按照C的方式去处理
+#endif
+	void a_c_function(int a);
+#ifdef __cplusplus                      // 检查是否是C++编译
+}                                   // extern "C" 结束
+#endif
+
+#if __cplusplus >= 201402                // 检查C++标准的版本号
+cout << "c++14 or later" << endl;    // 201402就是C++14
+#elif __cplusplus >= 201103              // 检查C++标准的版本号
+cout << "c++11 or before" << endl;   // 201103是C++11
+#else   // __cplusplus < 201103          // 199711是C++98
+//#error "c++ is too old"               // 太低则预处理报错
+#endif  // __cplusplus >= 201402         // 预处理语句结束
+// 
+//C++和编译器里都会有一些预定义的宏，可以更精细的通过这些信息来改变代码
+// 
+//还可以自定义一些宏，实现跨平台处理
+#if (PROJ_ANDROID)
+#include <proj_android.h>
+#elif (PROJ_IOS)
+#include <proj_ios.h>
+#endif
+//
+//还有一个特殊用法，可以显示启用或禁用一段代码，比注释更清晰
+#if 0          // 0即禁用下面的代码，1则是启用
+//...          // 任意的代码
+#endif         // 预处理结束
+#if 1          // 1启用代码，用来强调下面代码的必要性
+//...          // 任意的代码
+#endif         // 预处理结束
+// 
+
+//
+//C++17引入了 __has_include，检查文件是否存在（注意，不是检查文件是否已被包含
+//对于Include Guard，
+// 可以用指令#pragma once，但是非标准
+// C++20引入了module特性，但暂时也无法替代
+//boost.preprocessor库可以去看看
+//
 
 int main()
 {
-    std::cout << "Hello World!\n";
+	std::cout << "Hello World!\n";
+	test();
 }
