@@ -120,8 +120,8 @@ static uint32_t  calc_table[] = {  // 非常大的一个数组，有几十行
 #define proj_memzero(buf,n) (void) memset(buf,0,n)
 //宏没有作用域概念，全局生效
 // 所以对于一些简化代码，起临时作用的宏，用完尽快用#undef取消定义，避免冲突
-void 
-test() 
+void
+test()
 {
 #define CUBE(a) (a) * (a) * (a)
 	std::cout << CUBE(10) << std::endl;
@@ -187,8 +187,57 @@ cout << "c++11 or before" << endl;   // 201103是C++11
 //boost.preprocessor库可以去看看
 //
 
+
+//
+//属性和静态断言
+//
+
+//
+//在编译阶段，可以用一些指令或者关键字面向编译器编程，显示的告诉它代码某处如何处理，防止有时编译器自作聪明
+// 
+//属性（没怎么见到有人用过）
+// C++11之前，一些编译器有自己的编译指令，如GCC的 __attribute__，VC的__declspec （这个其实比C++的属性更常用，因为它同样适用于C）
+// C++11之后，有了正式的编译指令，也就是属性
+// 类似于给变量、函数、类贴上标签，给编译器识别处理（类似于JAVA注解？但JAVA注解在编译、类加载、运行时都作用，C++属性仅作用在编译期）
+// 没有新的关键字，使用两对方括号表示
+// 但C++11只有两个属性 noreturn 和 carries_dependency，作用都不大
+[[noreturn]]              // 属性标签
+int func(bool flag)       // 函数绝不会返回任何值
+{
+	throw std::runtime_error("XXX");
+}
+// C++14定义了较常用的 deprecated 标记不推荐的变量、函数或者类，表示即将废弃
+[[deprecated("deadline:2020-12-31")]]      // C++14 or later
+int old_func() { return 0; };
+// 能正常编译，但会收到警告
+// 
+//GCC属性文档
+// https://gcc.gnu.org/onlinedocs/gcc/Attribute-Syntax.html
+//
+
+//
+//静态断言
+// 
+//断言assert
+// 判断一个表达式必须为真，否则就会输出错误信息，调用abort终止程序
+// assert(p != nullptr);
+// 虽然是一个宏，但在预处理阶段不生效，运行时才起作用，又叫动态断言
+// 
+//static_assert
+// 与断言不同，并不是一个宏，而是专门的一个关键字
+// 在编译期生效，检查各种条件的静态断言，计算表达式的值，如果值为false，直接编译失败，就不会到运行时才知道
+// 例如，保证程序只在64位运行，可以使用这样的检查方式
+//static_assert(sizeof(long) == 8, "must run on x64"); //这里有点问题，win64下long也是4字节
+// 应该可以用指针长度来确定，更合理一些
+static_assert(sizeof(void*) == 8, "must run on x64");
+// 由于发生在编译期，所以编译器看不到运行时变量、指针、内存数据等，所以使用范围也并不多
+// 
+//
+
 int main()
 {
 	std::cout << "Hello World!\n";
 	test();
+
+	std::cout << sizeof(long) << std::endl;
 }
