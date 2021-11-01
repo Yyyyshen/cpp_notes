@@ -19,7 +19,7 @@ test_auto()
 {
 	auto str = "hello";//自动推导不一定完全是自己想要的，这里自动推导为const char[6]，如果想用std::string还是需要自己写
 	//C++14新增了字面量后缀s，所以
-	//auto str2 = "hello"s;//自动推导出std::string
+	//auto str2 = "hello"s;//自动推导出std::string，VS里后缀无效
 }
 // 其作用并不光是简化代码，还避免了对类型的硬编码，可以根据表达式类型自动适应，比如map和unordered_map
 // 变量右边必须有表达式才能使用（赋值、花括号初始化等），纯声明不能用auto
