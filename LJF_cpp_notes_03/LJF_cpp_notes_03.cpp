@@ -2,6 +2,9 @@
 //
 
 #include <iostream>
+#include <assert.h>
+
+//语言特性
 
 //
 //自动类型推导
@@ -145,6 +148,104 @@ test_const()
 
 //
 //smart_ptr 智能指针
+//
+
+//
+//指针
+// 源自C，本质为内存地址索引，能够直接读写内存，是高效的根源
+// 也是各种错误（无效、越界、内存泄露等）出现的原因
+// JAVA等语言，内置了垃圾回收机制，C++中是构造/析构和RAII惯用法
+// 
+//代理模式
+// 将原始指针封装，构造里初始化，析构里释放
+// 当对象失效后，自动调用析构，完成资源回收
+// 智能指针就是根据RAII实现了这些，并重载*和->，使用起来和原指针一样
+//
+
+//
+//unique_ptr
+// 
+void
+test_unique_str()
+{
+	std::unique_ptr<int> ptr1(new int(10));//必须初始化，只声明后使用是操作空指针
+	//ptr1++; //没有重载加减运算，不能随意移动地址
+	auto ptr2 = std::make_unique<int>(10);//unique_ptr的工厂函数，可以防止忘记初始化
+
+	//所有权
+	auto ptr2 = std::move(ptr1);//删除了拷贝赋值，必须用move显示转移所有权，保证持有者唯一
+}
+// 工厂函数的实现
+template<class T, class ... Args>//可变参数模板
+std::unique_ptr<T>
+my_make_unique(Args&&... args)
+{
+	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+//  
+//
+
+//
+//shared_ptr
+// 与unique_ptr相似，也可以使用工厂函数，重载了*和->操作符
+// 最大的不同是所有权可以安全共享可以像原始指针一样，有多个持有者（内部使用引用计数）
+// 当引用计数减少到0，才会真正释放
+// 语义完整（有拷贝赋值），可以在任何场合代替原始指针而不担心资源回收问题
+// 代价就是，引用计数的存储和管理都是成本，过度使用会降低效率
+// 指向对象的析构函数不能有过于复杂、阻塞的操作
+// 导致新的问题是 循环引用 ，在作为类成员时容易出现
+class Node final
+{
+public:
+	using this_type = Node;
+	using shared_type = std::shared_ptr<this_type>;
+public:
+	shared_type     next;      // 使用智能指针来指向下一个节点
+};
+void
+test_shared_ptr()
+{
+	auto n1 = std::make_shared<Node>();   // 工厂函数创建智能指针
+	auto n2 = std::make_shared<Node>();   // 工厂函数创建智能指针
+
+	assert(n1.use_count() == 1);    // 引用计数为1
+	assert(n2.use_count() == 1);
+
+	n1->next = n2;                 // 两个节点互指，形成了循环引用
+	n2->next = n1;
+
+	assert(n1.use_count() == 2);    // 引用计数为2
+	assert(n2.use_count() == 2);    // 无法减到0，无法销毁，导致内存泄漏
+}
+// 解决循环引用问题，要使用weak_ptr
+class Node2 final
+{
+public:
+	using this_type = Node2;
+
+	// 注意这里，别名改用weak_ptr
+	using shared_type = std::weak_ptr<this_type>;
+public:
+	shared_type     next;    // 因为用了别名，所以代码不需要改动
+};
+void
+test_weak_ptr()
+{
+	auto n1 = std::make_shared<Node2>();  // 工厂函数创建智能指针
+	auto n2 = std::make_shared<Node2>();  // 工厂函数创建智能指针
+
+	n1->next = n2;             // 两个节点互指，形成了循环引用
+	n2->next = n1;
+
+	assert(n1.use_count() == 1);    // 因为使用了weak_ptr，引用计数为1
+	assert(n2.use_count() == 1);   // 打破循环引用，不会导致内存泄漏
+
+	if (!n1->next.expired()) {     // 检查指针是否有效
+		auto ptr = n1->next.lock();  // lock()获取shared_ptr
+		assert(ptr == n2);
+	}
+}
+// 
 //
 
 int main()
