@@ -3,8 +3,12 @@
 
 #include <iostream>
 #include <assert.h>
+#include <vector>
+#include <algorithm>
 
 //语言特性
+
+using namespace std;
 
 //
 //自动类型推导
@@ -173,7 +177,7 @@ test_unique_str()
 	auto ptr2 = std::make_unique<int>(10);//unique_ptr的工厂函数，可以防止忘记初始化
 
 	//所有权
-	auto ptr2 = std::move(ptr1);//删除了拷贝赋值，必须用move显示转移所有权，保证持有者唯一
+	ptr2 = std::move(ptr1);//删除了拷贝赋值，必须用move显示转移所有权，保证持有者唯一
 }
 // 工厂函数的实现
 template<class T, class ... Args>//可变参数模板
@@ -298,7 +302,7 @@ try
 {
 	//函数体
 }
-catch(...){
+catch (...) {
 	//处理异常
 }
 // 
@@ -337,8 +341,150 @@ void func_noexcept() noexcept
 // 指针和内存分配 日志+调用栈
 //
 
+
+//
+//lambda
+//
+
+//
+//函数式编程
+// 
+
+void my_square(int x)           // 定义一个函数
+{
+	cout << x * x << endl;       // 函数的具体内容
+}
+void test_func_ptr() {
+	auto pfunc = &my_square;       // 只能用指针去操作函数，指针不是函数
+	(*pfunc)(3);                    // 可以用*访问函数
+	pfunc(3);                       // 也可以直接调用函数指针
+}
+// 简单lambda
+void test_lambda() {
+	auto func = [](int x) //函数是全局的，没有生存周期概念，并且也不允许嵌套函数
+	{					  //lambda表达式则是一个变量，可以就地定义，作用域就是所在函数内
+		cout << x + x << endl;
+	};
+	func(3);
+}
+// 捕获外部变量
+void test_closure() {
+	int n = 10;
+	auto func = [=](int x)
+	{
+		cout << x * n << endl;
+	};
+	func(3);
+}
+// 
+//
+
+//
+//lambda形式
+// [] 引出符
+// 引出符后面接()像普通函数一样声明入口函数
+// 用花括号定义函数体
+// auto f = [](){}; //最简单的lambda空函数
+// 
+// 要有良好的缩进格式，否则嵌套定义时可读性很差
+void test_lambda_2() {
+	auto f2 = []()                 // 定义一个lambda表达式
+	{
+		cout << "lambda f2" << endl;
+
+		auto f3 = [](int x)         // 嵌套定义lambda表达式
+		{
+			return x * x;
+		};// lambda f3              // 使用注释显式说明表达式结束
+
+		cout << f3(10) << endl;
+	};  // lambda f2               // 使用注释显式说明表达式结束
+}
+// 每个lambda表达式都有一个特殊类型，所以都使用auto来声明
+// 而一般来说，lambda在应用时一般都是匿名使用的临时对象，纯右值，运行后就释放了，这样可以最小化影响范围，增加安全性
+void test_lambda_3() {
+	vector<int> v = { 3, 1, 8, 5, 0 };     // 标准容器
+
+	cout << *find_if(begin(v), end(v),   // 标准库里的查找算法
+		[](int x)                // 匿名lambda表达式，不需要auto赋值
+		{
+			return x >= 5;        // 用做算法的谓词判断条件 
+		}                        // lambda表达式结束
+	)
+		<< endl;                        // 语句执行完，lambda表达式就不存在了
+}
+// 
+// []捕获规则
+// [=]表示按值捕获所有外部变量，表达式内部是值的拷贝，不能修改
+// [&]表示按引用捕获所有外部变量，内部是引用的方式使用，能修改
+// []内明确写出外部变量名，指定按值或引用方式捕获
+void test_lambda_4() {
+	int x = 100;
+	int y = 10;
+	auto f1 = [=]()
+	{
+		//x = 10;//error
+	};
+	auto f2 = [&]()
+	{
+		x = 10;//可修改
+	};
+	auto f3 = [x]()
+	{
+		//x = 100;//error
+	};
+	auto f4 = [=, &x]() //规则表示，除了x以应用方式捕获，其他按值
+	{
+		x = 100;
+		//y = 10; //error，y还是按值捕获，不能修改
+	};
+}
+// 外部变量 是lambda表达式定义之前出现的所有变量，无论局部还是全局
+// =号捕获是独立副本，非常安全
+// &号捕获的引用，存在风险，如果lambda表达式在里定义点较远地方调用，引用可能已经发生了变化甚至失效了，可能导致不可预期结果
+// 所以，应尽量显示写出要捕获的变量
+class DemoLambda final
+{
+private:
+	int x = 0;
+public:
+	auto print()              // 返回一个lambda表达式供外部使用
+	{
+		return [this]() -> void     // 显式捕获this指针
+		{
+			cout << "member = " << x << endl;
+		};
+	}
+};
+// 
+//
+
+//
+//lambda泛型化
+// 相当于简化的模板函数
+void test_template_lambda() {
+	auto f = [](const auto& x)
+	{
+		return x + x;
+	};
+	cout << f(3) << endl;//int
+	cout << f(3.14) << endl;//double
+	cout << f(std::string("hello")) << endl;
+}
+// 
+// 
+
+// 
+// lambda不支持fucntion-try形式，只能内部try catch
+// 返回值类型可以自动推导，但有时必须明确返回值类型，格式为在圆括号后用 “ -> type ” 形式定义返回值
+// 按值捕获是，可以给lambda表达式加mutable修饰，允许修改变量，但修改的也只是拷贝，不影响外部原值
+// 如果长期持有外部变量，可以考虑使用shared_ptr避免变量失效
+// 每个lambda表达式类型都唯一，所以即使函数签名相同，也不能互相赋值，可以使用std::function类，存储任意符合签名的可调用物，搭配lambda表达式使用
+//
+
 int main()
 {
 	std::cout << "Hello World!\n";
 	test_const();
+	test_template_lambda();
 }
