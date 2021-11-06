@@ -5,6 +5,11 @@
 #include <assert.h>
 #include <string>
 #include <regex>
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <iterator>
+#include <numeric>
 
 //标准库
 
@@ -171,6 +176,82 @@ test_regex()
 // c_str()和data()有区别，都返回const char*指针，但c_str()结尾有'\0'
 // boost里有lexical_cast，转换字符串和数字
 // 其他第三方正则库，PCRE、Hyperscan、libsregex
+//
+
+
+//
+//容器
+// 存放元素的数据结构
+// 
+//通用特性
+// 保存元素用值语义，也就是拷贝、副本，而不是引用
+// 元素较大或很多时，开销很高，可以为元素实现转移构造和转移赋值函数，用std::move来填进去
+// C++11新增emplace操作函数，就地构造元素，免去构造再拷贝、转移的成本，高效也方便些
+// v.emplace_back();
+// 容器存放指针虽然开销很低，但指针的持有关系，不能利用容器自动销毁的特性，手动管理声明周期容易出错
+// 可以考虑存放智能指针
+// 
+//具体特性
+// 顺序容器 array、vector、deque、list、forward_list
+//	array，数组，定长
+//	vector，数组，动态长度
+//	deque，数组，动态长度，两端高效插入删除
+//	以上三个都是连续数组，中间插入删除效率低
+//	list，双链表结构，插入删除任意位置效率都高，但没有索引，查找效率低
+//	forward，单链表
+//	链表存储成本比数组高，因为多了指针
+//	分配内存时，数组结构的容器双倍扩容，链表结构的固定步长扩容
+// （吐槽一下，看了快一半了，全是基础知识，或者一些经典书都有的，这专栏怎么值100多的呢= =）
+// 
+// 有序容器 set/multiset map/multimap
+//	有序的概念，是按照某种规则自动排序，定义容器时必须指定key的比较函数，只不过通常默认是less
+//	基本类型都支持默认排序，如果是自定义类型，需要自己重载操作符
+//	也可以自定义模板参数，写一个函数作为比较函数
+//	每次插入时都会自动排序，含树旋转成本，所以，如果不需要实时排序，最好用vector，全部插入后一次性排序
+//	
+void test_container()
+{
+	set<int> s = { 7, 3, 9 };           // 定义集合并初始化3个元素
+
+	for (auto& x : s) {                // 范围循环输出元素
+		cout << x << ",";              // 从小到大排序，3,7,9
+	}
+
+	auto comp = [](auto a, auto b)  // 定义一个lambda，用来比较大小
+	{
+		return a > b;                // 定义大于关系
+	};
+
+	set<int, decltype(comp)> gs(comp);  // 使用decltype得到lambda的类型
+
+	std::copy(begin(s), end(s),          // 拷贝算法，拷贝数据
+			inserter(gs, gs.end()));  // 使用插入迭代器
+
+	for (auto& x : gs) {                // 范围循环输出元素
+		cout << x << ",";                // 从大到小排序，9,7,3
+	}
+}
+// 无序容器 unordered前缀的set、map
+//	内部结构不是红黑树，而是散列表
+//	需要key具备两个条件，可计算hash值，能执行比较操作
+//	散列函数最好用标准std::hash对象
+auto hasher = [](const auto& p)    // 定义一个lambda表达式
+{
+	return std::hash<int>()(p.x);  // 调用标准hash函数对象计算
+};
+//	如果单纯想使用集合或者字典，没有排序要求，就该用无序容器，速度更快
+// 
+// 
+// 容器适配器
+// stack、queue、priority_queue，是基于其他容器适配实现的，接口变化，内部结构不变
+// 
+
+// 
+//选择标准
+// 不要有多余操作，按需选择
+// 没有特殊需求，最优是vector，速度最快，开销最低
+// 只在末尾添加元素的，就不用选deque/list
+// 只想快速查找不需要排序的，就选unordered
 //
 
 int main()
