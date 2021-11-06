@@ -10,6 +10,9 @@
 #include <algorithm>
 #include <iterator>
 #include <numeric>
+#include <thread>
+#include <mutex>
+#include <future>
 
 //标准库
 
@@ -356,10 +359,99 @@ void test_common()
 //多线程
 //
 
+//
+//线程
+// 从CPU、操作系统等不同角度，定义其实是不同的
+// C++中，线程就是一个独立运行的函数
+void test_thread()
+{
+	auto f = []() {
+		cout << "tid=" << this_thread::get_id() << endl;
+	};
+	thread thd(f);
+}
+// 主线程调用接口函数，创建子线程，脱离主线程控制流程，但共享主线程数据
+// 带来一些经典问题，同步、死锁、竞争、调度等
+// 业务间一般都会共享数据
+// 
+//基本实践
+// 记住“读而不写”不会有数据竞争
+// 仅调用一次（互斥量？）
+//	静态、全局的once_flag变量，然后调用call_once函数
+static std::once_flag flag;
+void test_call_once()
+{
+	auto f = []() {
+		std::call_once(flag, []() {
+			cout << "call once" << endl;
+			});
+	};
+	thread thd1(f);
+	thread thd2(f);
+	//消除初始化的并发冲突，可以代替双重检查锁
+}
+// 线程局部存储
+//	读写全局变量场景比较常见，线程独占所有权（并非是数据真的需要共享）
+//	关键字thread_local，标记的变量在每个线程都有独立副本，是线程独占的
+void test_thread_local()
+{
+	thread_local int n = 0;        // 线程局部存储变量
+
+	auto f = [&](int x)           // 在线程里运行的lambda表达式，捕获引用
+	{
+		n += x;                   // 使用线程局部变量，互不影响
+		cout << n;                // 输出，验证结果
+	};
+
+	thread t1(f, 10);           // 启动两个线程，运行函数f
+	thread t2(f, 20);
+}
+// 原子变量
+//	对于必须共享的变量，解决同步问题，保证数据一致性
+//	常见的是用互斥量，但对于小的数据（基本数据类型），可以采用原子化，成本更低
+void test_atomic()
+{
+	atomic_int  x{ 0 };          // 初始化，不能用=，因为原子变量禁用了拷贝构造
+	atomic_long y{ 1000L };      // 初始化，只能用圆括号或者花括号
+
+	assert(++x == 1);           // 自增运算
+
+	y += 200;                   // 加法运算
+	assert(y < 2000);           // 比较运算 
+}
+// thread
+//	启动一个线程
+//	不建议直接使用原始线程的概念，隐藏到底层
+//	使用async()，异步运行一个任务
+void test_async()
+{
+	auto task = [](auto x) {
+		this_thread::sleep_for(x * 1ms);
+		cout << "sleep for " << x << " ms" << endl;
+		return x;
+	};
+	auto f = std::async(task, 10);//不显式获取返回值的话，会同步阻塞（临时对象析构），相当于是sync了
+	f.wait();
+	cout << f.get() << endl;
+}
+// 
+//
+
+//
+//C++20加入了携程，开销更低
+// co_wait/co_yield/co_return
+// 
+//tbb
+// Intel的多线程库，提供了线程安全的容器，并行算法等
+//
+
 int main()
 {
 	std::cout << "Hello World!\n";
 	//test_raw_string();
 	//test_regex();
-	test_iter();
+	//test_iter();
+	//test_thread();
+	//test_call_once();
+	test_async();
 }
