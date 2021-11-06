@@ -225,7 +225,7 @@ void test_container()
 	set<int, decltype(comp)> gs(comp);  // 使用decltype得到lambda的类型
 
 	std::copy(begin(s), end(s),          // 拷贝算法，拷贝数据
-			inserter(gs, gs.end()));  // 使用插入迭代器
+		inserter(gs, gs.end()));  // 使用插入迭代器
 
 	for (auto& x : gs) {                // 范围循环输出元素
 		cout << x << ",";                // 从大到小排序，9,7,3
@@ -254,9 +254,112 @@ auto hasher = [](const auto& p)    // 定义一个lambda表达式
 // 只想快速查找不需要排序的，就选unordered
 //
 
+
+//
+//算法
+//
+
+//
+//C++中的算法指的是工作在容器上的泛型函数
+// 常用 remove、sort、binary_search、make_heap
+// 大多数算法本质是for、while循环
+// 算法中传递的函数对象，可以直接使用lambda表达式就地定义
+void
+test_alog()
+{
+	vector<int> vec;
+	auto n = std::count_if(begin(vec), end(vec), [](auto x) {
+		return x > 2;
+		});
+}
+// 
+//迭代器
+// 算法操作的并不直接是容器，是通过迭代器简洁访问元素
+// 这样分离了数据和操作，算法可以不关心容器内部结构，以统一方式操作元素
+// 容器给成员提供了begin、end函数（但作者推荐用全局函数begin、end，也就是上面那种写法，不过我觉得成员更容易读才对）
+// 迭代器可以前进后退，但不一定支持++、--，推荐使用函数操作
+//	distance 计算两个迭代器距离
+//	advance 前进或后退N步
+//	next/prev 前进或后退
+void test_iter()
+{
+	vector<int> vec = { 0,1,2,3,4 };
+
+	auto b = begin(vec);          // 全局函数获取迭代器，首端
+	auto e = end(vec);            // 全局函数获取迭代器，末端
+	auto b_next = next(b);
+	assert(distance(b, e) == 5);  // 迭代器的距离
+
+	auto p = next(b);              // 获取“下一个”位置
+	assert(distance(b, p) == 1);    // 迭代器的距离
+	assert(distance(p, b) == -1);  // 反向计算迭代器的距离
+
+	advance(p, 2);                // 迭代器前进两个位置，指向元素'3'
+	assert(*p == 3);
+	assert(p == prev(e, 2));     // 是末端迭代器的前两个位置
+}
+// 
+//常用算法
+// for_each 可以代替手写for
+// sort快速排序，是全排列
+//	stable_sort排序后仍然保持元素相对顺序
+//	partial_sort选出TopN
+//	nth_element可求BestN、中位数、百分位数
+//	按规则元素分两组，partition
+//	第一名和最后一名，minmax_element
+void test_common()
+{
+	vector<int> v;
+	// top3
+	std::partial_sort(
+		begin(v), next(begin(v), 3), end(v));  // 取前3名
+
+	// best3
+	std::nth_element(
+		begin(v), next(begin(v), 3), end(v));  // 最好的3个
+
+	// Median
+	auto mid_iter =                            // 中位数的位置
+		next(begin(v), v.size() / 2);
+	std::nth_element(begin(v), mid_iter, end(v));// 排序得到中位数
+	cout << "median is " << *mid_iter << endl;
+
+	// partition
+	auto pos = std::partition(                // 找出所有大于9的数
+		begin(v), end(v),
+		[](const auto& x)                    // 定义一个lambda表达式
+		{
+			return x > 9;
+		}
+	);
+	for_each(begin(v), pos, [](const auto& x) {
+		cout << x << " ";
+		});         // 输出分组后的数据  
+	cout << endl;
+	// min/max
+	auto value = std::minmax_element(        //找出第一名和倒数第一
+		cbegin(v), cend(v)
+	);
+}
+//	排序最好再顺序容器vector调用；对list，可以用sort，对链表做了特别优化；无序容器不要排序，因为散列表特殊无法交换位置
+// 
+// 查找算法
+//	排序后就可以更快的查找
+//	binary_search 再已排序区间执行二分，但只返回bool表示是否存在
+//	lower_bound 二分查找，返回第一个大于或等于查找值的位置（不一定是真的找到）
+//	set/map中可以用find
+// 
+//
+
+
+//
+//多线程
+//
+
 int main()
 {
 	std::cout << "Hello World!\n";
 	//test_raw_string();
-	test_regex();
+	//test_regex();
+	test_iter();
 }
