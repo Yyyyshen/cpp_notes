@@ -143,6 +143,27 @@ test_curl() {
 
 //C++23，预计加入networking，基于boost.asio，前摄器模式统一封装了操作系统的各种异步机制（epoll、kqueue、IOCP），支持协程
 
+
+//
+//C++为底层基础，脚本语言作为上层建筑的混合系统
+//
+
+//
+//python有C接口，可以写扩展模块，但比较麻烦，可以用C++中的一些特性简化工作
+// https://github.com/pybind/pybind11
+// 用C++开发python扩展，借鉴了boost.python
+//
+
+//
+//lua
+// 游戏常用脚本语言，使用解释器运行，速度很快
+// LuaJIT用了JIT技术，把lua即时编译成机器码，速度几乎和C/C++媲美
+// https://github.com/openresty/luajit2 （第三方luajit分支，比官方维护快）
+// 
+//与C++交互
+// LuaBridge，需要把C++接口转成C接口导出
+//
+
 int main()
 {
 	std::cout << "Hello World!\n";
