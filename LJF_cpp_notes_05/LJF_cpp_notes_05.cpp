@@ -77,6 +77,14 @@ test_nlohmann_json()
 // （lua里用过）
 //
 
+//
+//boost::archive
+// 之前项目里用过，在需要序列化的类型里加上一个
+// void serialize(Archive& ar, const unsigned int version)
+// 定义好序列化的成员
+// 感觉用起来也很轻便
+//
+
 
 //
 //网络通信
@@ -85,17 +93,59 @@ test_nlohmann_json()
 //
 //数据序列化就是为了在网络传输中更容易交换
 //原生的SocketAPI要写一个完善的收发功能需要考虑很多细节，还需要异步等
-//可以用第三方库，libcurl、cpr、ZMQ、asio
+//可以用第三方库，libcurl、cpr、ZMQ、asio、beast
 //
 
 //
 //libcurl
 // 是curl的底层核心，十分稳定可靠，纯C开发，兼容和移植性好
 // C++可以直接调用
+#include <curl/curl.h>
+size_t write_callback(char*, size_t, size_t, void*);//回调函数原型
+void
+test_curl() {
+	auto curl = curl_easy_init();//创建CURL句柄
+	assert(curl);
+
+	curl_easy_setopt(curl, CURLOPT_URL, "http://nginx.org");//设置各种参数
+	//...没设置回调函数的话，默认使用内部回调，把响应内容输出到标准流，也就是直接打印
+	//curl是纯C写的，所以回调需要是函数指针，C++中lambda更方便，就又一个特别的转换技巧
+	//无捕获（[]内为空）的lambda表达式可以显式转换成函数指针，定义一个函数原型后，可以做如下转换后调用
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
+		(decltype(&write_callback)) //回调函数原型指针类型，显式进行转换
+		[](char* ptr, size_t size, size_t nmemb, void* userdata) {
+			cout << std::string(ptr) << endl;
+			cout << "size:" << size * nmemb << endl;
+			return size * nmemb;
+		});
+	//主要使用就是各种opt的设置，可以封装一个类来使用
+
+	auto res = curl_easy_perform(curl);//执行
+	if (res != CURLE_OK)//检查执行结果
+		cout << curl_easy_strerror(res) << endl;
+
+	curl_easy_cleanup(curl);//清理句柄
+}
+// 
 //
+
+//
+//cpr
+// 是对curl的一个C++11封装，接口更加易用
+// https://docs.libcpr.org/
+//
+
+//
+//ZMQ
+// 不仅是网络库，更像一个异步并发框架（未支持win10）
+// 除了支持tcp/ip，还支持进程内和进程间通信
+//
+
+//C++23，预计加入networking，基于boost.asio，前摄器模式统一封装了操作系统的各种异步机制（epoll、kqueue、IOCP），支持协程
 
 int main()
 {
 	std::cout << "Hello World!\n";
-	test_nlohmann_json();
+	//test_nlohmann_json();
+	test_curl();
 }
