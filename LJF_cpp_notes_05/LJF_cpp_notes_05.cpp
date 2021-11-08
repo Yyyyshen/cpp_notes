@@ -164,6 +164,64 @@ test_curl() {
 // LuaBridge，需要把C++接口转成C接口导出
 //
 
+
+//
+//性能分析
+//
+
+//
+//系统级工具
+// Linux
+//	top、sar、vmstat、netstat等
+// 
+// top
+//	最简单直观查看CPU，内存等关键性能指标
+// pstack
+//	查看进程调用栈信息，是进程的静态截面
+// strace
+//	可以显式进程正在运行的系统调用，是实时的
+// 
+// 三个信息结合看，基本能知道进程在干什么，分析出瓶颈
+// perf
+//	按固定频率采样，相当于连续多次执行pstack，然后统计函数调用次数，算出百分比
+//	采样频率足够大时，把所有静态截面组合，就能得到可信数据，全面描述CPU情况
+//	perf top -K -p xxx
+//	按CPU使用率排序，只看用户空间的调用，容易找出最消耗CPU的函数
+//	通常可以快速定位系统瓶颈，找到优化方向
+// 
+//源码级工具
+// 侵入式分析工具，在源码里埋点（计时器、计数器、日志打印其实都算）
+// Google Performance Tools， gperftools，一个C++工具集
+// 分析工具有CPUProfiler和HeapProfiler（使用智能指针和标准容器基本可以忽略）
+// CPUProfiler原理和perf差不多
+//auto make_cpu_profiler =            // lambda表达式启动性能分析
+//[](const string& filename)          // 传入性能分析的数据文件名
+//{
+//	ProfilerStart(filename.c_str());  // 启动性能分析
+//	ProfilerRegisterThread();         // 对线程做性能分析
+//
+//	return std::shared_ptr<void>(     // 返回智能指针
+//		nullptr,                        // 空指针，只用来占位
+//		[](void*) {                      // 删除函数执行停止动作
+//			ProfilerStop();             // 停止性能分析
+//		}
+//	);
+//};
+void test_something()
+{
+	//auto cp = make_cpu_profiler("case1.perf");
+
+	//do something
+
+	//析构时自动调用停止性能分析函数
+}
+// *.perf文件是二进制的，需要pprof工具输出文本形式的分析报告
+// pprof --text ./a.out case1.perf > case1.txt
+// 报告格式与perf很像，源码级的采样很详细，但大量内部函数细节很难找重点
+// 也可输出图形化报告
+// https://github.com/gperftools/gperftools/tree/master/docs
+//
+
 int main()
 {
 	std::cout << "Hello World!\n";
