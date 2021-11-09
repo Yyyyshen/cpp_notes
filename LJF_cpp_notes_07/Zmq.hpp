@@ -12,6 +12,7 @@ BEGIN_NAMESPACE(yyyyshen)
 //
 //网络通信模块
 // 使用ZMQ
+// libzmq环境+cppzmq封装 https://github.com/zeromq
 //
 
 using zmq_context_type = zmq::context_t;	//定义常用别名

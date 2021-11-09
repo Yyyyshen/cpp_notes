@@ -22,7 +22,7 @@ public:
 	SpinLock() = default;				  //使用默认构造和析构
 	~SpinLock() = default;
 
-	SpinLock(const this_type&) = delete;  //禁用拷贝
+	SpinLock(const this_type&) = delete;  //禁用拷贝（如果不想反复写此类代码，可以利用boost小工具类noncopyable，实现了等价功能，直接继承，避免重复代码）
 	this_type& operator=(const this_type&) = delete;
 
 public:
