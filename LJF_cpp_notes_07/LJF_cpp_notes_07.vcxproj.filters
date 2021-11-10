@@ -35,6 +35,9 @@
     <ClInclude Include="SalesData.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Summary.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="conf.lua" />

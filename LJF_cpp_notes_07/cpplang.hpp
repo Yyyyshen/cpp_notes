@@ -13,6 +13,12 @@
 #include <atomic>			//原子变量
 #include <thread>			//线程
 #include <regex>			//正则
+#include <map>				//容器
+#include <iterator>			//迭代器，用全局函数获取迭代器
+#include <algorithm>		//算法
+#include <future>			//异步
+
+#include <cstdio>
 
 
 //宏定义，条件编译，设置兼容性

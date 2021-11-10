@@ -1,8 +1,6 @@
 ﻿// LJF_cpp_notes_07.cpp : 此文件包含 "main" 函数。程序执行将在此处开始并结束。
 //
 
-#include <iostream>
-
 //应用实践
 
 //本例总结
@@ -29,7 +27,7 @@
 //明确知道不抛异常的函数标记为noexcept进行优化
 //
 
-using namespace std;
+//=======================================================================
 
 //
 //书店应用（C++ Primer中例子参考）
@@ -43,7 +41,91 @@ using namespace std;
 // 数据定期上报
 //
 
+//定义完各类，进行组合
+#include "cpplang.hpp"							//核心头文件
+
+#include "Config.hpp"							//封装配置文件，混合lua脚本
+#include "Summary.hpp"							//数据汇总处理
+#include "Zmq.hpp"								//网络通信
+
+#include "json.hpp"								//上报用json
+//#include <cpr/cpr.h>							//curl封装
+
+USING_NAMESPACE(yyyyshen);
+USING_NAMESPACE(std);
+
 int main()
+try {											//try/catch function形式，将整个main包起来
+	std::cout << "Server Start" << std::endl;
+
+	Config conf;
+	conf.load("./conf.lua");					//读取lua配置文件
+
+	Summary sum;
+	std::atomic_int count{ 0 };					//数据存储和统计
+
+	auto recv_cycle = [&]()						//服务器主循环lambda函数，引用模式捕获上面变量
+	{											//主业务：ZMQ接收数据、msgpack反序列化、存储数据；主循环只接收数据，包装后扔到另外的线程取处理
+
+		using zmq_ctx = ZmqContext<1>;
+		auto sock = zmq_ctx::recv_sock();		//获取zmq的接收sock，并根据配置绑定接收端口
+		sock.bind(conf.get<string>("config.zmq_ipc_addr"));
+
+		for (;;)								//服务器无限循环运行
+		{
+			auto msg_ptr =						//把即将获取的数据包封装进智能指针
+				std::make_shared<zmq_message_type>();
+			sock.recv(msg_ptr.get());			//接收数据，阻塞模式
+
+			++count;							//计数
+
+			std::thread(						//将数据处理放进其他线程，分离业务
+				[&sum, msg_ptr]() {				//显式捕获，引用捕获数据汇总，值捕获智能指针（防止线程运行时智能指针离开作用域被销毁）
+					SalesData book;
+
+					auto obj = msgpack::unpack(msg_ptr->data<char>(), msg_ptr->size()).get();
+					obj.convert(book);			//将获取的数据反序列化，转换为自定义对象
+
+					sum.add_sales(book);		//存储数据
+				}
+			).detach();							//分离线程，异步运行
+		}
+	};
+
+	auto log_cycle = [&]()						//数据上报循环
+	{
+		auto http_addr = conf.get<string>("config.http_addr");
+		auto time_interval = conf.get<int>("config.time_interval");
+
+		for (;;)								//定时上报
+		{
+			std::this_thread::sleep_for(time_interval * 1s);
+
+			using json_t = nlohmann::json;
+			json_t j;
+			j["count"] =						//原子变量转换为int
+				static_cast<int>(count);
+			j["minmax"] =
+				sum.minmax_sales();
+#if 0
+			auto res = cpr::Post(				//上报数据
+				cpr::Url{ http_addr },
+				cpr::Body{ j.dump() },
+				cpr::Timeout{ 200ms }
+			);
+
+			if (res.status_code != 200)			//检查上报结果
+				cerr << "http post failed" << endl;
+#endif
+		}
+	};
+
+	auto data_server = std::async(std::launch::async, recv_cycle);
+	auto report_server = std::async(std::launch::async, log_cycle);
+
+	report_server.wait();						//启动服务，让程序一直运行下去
+}
+catch (std::exception& e)
 {
-    std::cout << "Hello World!\n";
+	std::cerr << e.what() << std::endl;
 }

@@ -149,6 +149,7 @@
     <ClInclude Include="cpplang.hpp" />
     <ClInclude Include="SalesData.hpp" />
     <ClInclude Include="SpinLock.hpp" />
+    <ClInclude Include="Summary.hpp" />
     <ClInclude Include="Zmq.hpp" />
   </ItemGroup>
   <ItemGroup>
