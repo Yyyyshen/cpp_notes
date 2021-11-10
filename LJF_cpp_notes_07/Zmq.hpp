@@ -5,7 +5,7 @@
 
 #include "cpplang.hpp"
 
-#include "third-party/zmq/include/zmq.hpp"
+#include <zmq.hpp>
 
 BEGIN_NAMESPACE(yyyyshen)
 

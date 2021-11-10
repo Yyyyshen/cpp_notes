@@ -78,6 +78,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir)\third-party\lua\include;$(ProjectDir)\third-party\zmq\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\third-party\lua\lib;$(ProjectDir)\third-party\zmq\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -143,8 +145,13 @@
     <ClCompile Include="LJF_cpp_notes_07.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Config.hpp" />
     <ClInclude Include="cpplang.hpp" />
     <ClInclude Include="SpinLock.hpp" />
+    <ClInclude Include="Zmq.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="conf.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
