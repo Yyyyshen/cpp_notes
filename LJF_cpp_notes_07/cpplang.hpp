@@ -8,9 +8,11 @@
 
 //集中放置标准头、语言相关定义、其他源文件
 
+#include <iostream>
 #include <cassert>			//断言
 #include <atomic>			//原子变量
 #include <thread>			//线程
+#include <regex>			//正则
 
 
 //宏定义，条件编译，设置兼容性
