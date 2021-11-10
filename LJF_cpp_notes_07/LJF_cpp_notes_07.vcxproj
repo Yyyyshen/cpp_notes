@@ -78,7 +78,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)\third-party\lua\include;$(ProjectDir)\third-party\zmq\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\third-party\msgpack\include;$(ProjectDir)\third-party\lua\include;$(ProjectDir)\third-party\zmq\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\third-party\lua\lib;$(ProjectDir)\third-party\zmq\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClInclude Include="Config.hpp" />
     <ClInclude Include="cpplang.hpp" />
+    <ClInclude Include="SalesData.hpp" />
     <ClInclude Include="SpinLock.hpp" />
     <ClInclude Include="Zmq.hpp" />
   </ItemGroup>

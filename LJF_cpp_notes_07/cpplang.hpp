@@ -43,4 +43,4 @@
 #define USING_NAMESPACE(x) using namespace x
 
 
-#endif //_CPP_LANG_HPP
+#endif // !_CPP_LANG_HPP
