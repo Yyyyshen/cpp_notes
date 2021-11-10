@@ -33,6 +33,15 @@
 //echo "source /opt/rh/devtoolset-m/enable" >>/etc/profile
 //
 
+
+//书目推荐
+// 
+//《设计模式：可复用面向对象软件的基础》
+//《C++ 标准程序库》
+//《C++ 语言的设计与演化》
+//《C++ Primer》  
+//
+
 int main()
 {
 	std::cout << "Hello World!\n";
