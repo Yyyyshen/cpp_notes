@@ -63,7 +63,7 @@ public:
 
 public:									  //½ûÓÃ¿½±´
 	SpinLockGuard(const this_type&) = delete;
-	this_type& oerator(const this_type&) = delete;
+	this_type& operator=(const this_type&) = delete;
 
 public:
 	SpinLockGuard(spin_lock_type& lock) noexcept
