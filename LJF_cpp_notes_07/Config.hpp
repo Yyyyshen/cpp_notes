@@ -64,9 +64,14 @@ public:
 
 		auto key1 = m_what[1].str();				//取出key
 		auto key2 = m_what[2].str();
-													//通过luabridge获取lua文件中的表
-		auto v = luabridge::getGlobal(m_vm.get(), key1.c_str());
-		return luabridge::LuaRef_cast<T>(v[key2]);				//在表中取值，并将lua中的值做类型转换成C++
+
+		auto v =									//通过luabridge获取lua文件中的表
+			luabridge::getGlobal(m_vm.get(), key1.c_str());
+		auto ret = luabridge::LuaRef_cast<T>(v[key2]);
+
+		std::cout << key1 << "." << key2 << " = " << ret << std::endl;
+
+		return ret;									//在表中取值，并将lua中的值做类型转换成C++
 	}
 
 private:

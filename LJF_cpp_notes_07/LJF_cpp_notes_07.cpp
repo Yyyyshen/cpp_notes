@@ -54,6 +54,23 @@
 USING_NAMESPACE(yyyyshen);
 USING_NAMESPACE(std);
 
+static
+auto debug_print = [](auto& b)					//日志打印
+{
+	using json_t = nlohmann::json;
+
+	json_t j;
+
+	j["id"] = b.id();
+	j["sold"] = b.sold();
+	j["revenue"] = b.revenue();
+	//j["average"] = b.average();
+
+	std::cout << j.dump(2) << std::endl;
+};
+
+#if 1											//服务端
+
 int main()
 try {											//try/catch function形式，将整个main包起来
 	std::cout << "Server Start" << std::endl;
@@ -78,6 +95,8 @@ try {											//try/catch function形式，将整个main包起来
 				std::make_shared<zmq_message_type>();
 			sock.recv(*msg_ptr.get());			//接收数据，阻塞模式
 
+			std::cout << "recv data size: " << msg_ptr->size() << std::endl;
+
 			++count;							//计数
 
 			std::thread(						//将数据处理放进其他线程，分离业务
@@ -86,6 +105,7 @@ try {											//try/catch function形式，将整个main包起来
 
 					auto obj = msgpack::unpack(msg_ptr->data<char>(), msg_ptr->size()).get();
 					obj.convert(book);			//将获取的数据反序列化，转换为自定义对象
+					debug_print(book);			//输出日志
 
 					sum.add_sales(book);		//存储数据
 				}
@@ -130,3 +150,77 @@ catch (std::exception& e)
 {
 	std::cerr << e.what() << std::endl;
 }
+
+#endif
+
+
+#if 0											//客户端
+
+// sales data
+static
+auto make_sales = [=](const auto& id, auto s, auto r)
+//-> msgpack::sbuffer
+{
+	return SalesData(id, s, r).pack();
+
+#if 0
+	SalesData book(id);
+
+	book.inc_sold(s);
+	book.inc_revenue(r);
+
+	debug_print(book);
+
+	auto buf = book.pack();
+	cout << buf.size() << endl;
+
+	//SalesData book2 {buf};
+	//assert(book.id() == book2.id());
+	//debug_print(book2);
+
+	return buf;
+#endif
+};
+
+// zmq send
+static
+auto send_sales = [](const auto& addr, const auto& buf)
+{
+	using zmq_ctx = ZmqContext<1>;
+
+	auto sock = zmq_ctx::send_sock();
+
+	sock.connect(addr);
+	assert(sock.handle() != nullptr);
+
+	zmq::const_buffer const_buf(buf.data(), buf.size());
+
+	auto ret = sock.send(const_buf);
+	assert(ret.value() == buf.size());
+
+	cout << "send len = " << ret.value() << endl;
+};
+
+int main()
+try
+{
+	cout << "Clint Start" << endl;
+
+	//auto buf = make_sales("001", 10, 100);
+	//send_sales("tcp://127.0.0.1:5555", buf);
+
+	send_sales("tcp://127.0.0.1:5555",
+		make_sales("001", 10, 100));
+
+	std::this_thread::sleep_for(100ms);
+
+	send_sales("tcp://127.0.0.1:5555",
+		make_sales("002", 20, 200));
+
+}
+catch (std::exception& e)
+{
+	std::cerr << e.what() << std::endl;
+}
+
+#endif
