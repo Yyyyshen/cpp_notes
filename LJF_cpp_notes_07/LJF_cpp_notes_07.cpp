@@ -104,7 +104,7 @@ try {											//try/catch function形式，将整个main包起来
 					SalesData book;
 
 					auto obj = msgpack::unpack(msg_ptr->data<char>(), msg_ptr->size()).get();
-					obj.convert(book);			//将获取的数据反序列化，转换为自定义对象
+					obj.convert(book);			//将获取的数据反序列化，转换为自定义对象	//todo这里msgpack的使用有问题
 					debug_print(book);			//输出日志
 
 					sum.add_sales(book);		//存储数据
