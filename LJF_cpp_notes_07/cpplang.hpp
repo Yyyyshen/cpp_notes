@@ -20,6 +20,10 @@
 
 #include <cstdio>
 
+#pragma comment(lib,"lua51.lib")
+#pragma comment(lib,"luajit.lib")
+#pragma comment(lib,"libzmq.lib")
+
 
 //宏定义，条件编译，设置兼容性
 

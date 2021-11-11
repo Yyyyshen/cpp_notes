@@ -35,18 +35,30 @@ public:
 	}
 
 	static
-		zmq_socket_type recv_sock(int hwm = 1000)
+		zmq_socket_type recv_sock(int hwm = 1000, int linger = 10)
 	{										//创建接收socket，可能产生异常
 		zmq_socket_type sock(context(), ZMQ_PULL);
-		sock.setsockopt(ZMQ_RCVHWM, hwm);	//设置HWM（High Water Mark，本地缓存数量，超过部分阻塞或丢弃）
+
+		//sock.setsockopt(ZMQ_RCVHWM, hwm);	//设置HWM（High Water Mark，本地缓存数量，超过部分阻塞或丢弃）
+		//sock.setsockopt(ZMQ_LINGER, linger);
+
+		sock.set(zmq::sockopt::rcvhwm, hwm);//高版本不同的写法
+		sock.set(zmq::sockopt::linger, linger);
+
 		return sock;
 	}
 
 	static
-		zmq_socket_type send_sock(int hwm = 1000)
+		zmq_socket_type send_sock(int hwm = 1000, int linger = 10)
 	{										//创建发送socket
 		zmq_socket_type sock(context(), ZMQ_PUSH);
-		sock.setsockopt(ZMQ_SNDHWM, hwm);
+
+		//sock.setsockopt(ZMQ_SNDHWM, hwm);
+		//sock.setsockopt(ZMQ_LINGER, linger);
+
+		sock.set(zmq::sockopt::sndhwm, hwm);
+		sock.set(zmq::sockopt::linger, linger);
+
 		return sock;
 	}
 

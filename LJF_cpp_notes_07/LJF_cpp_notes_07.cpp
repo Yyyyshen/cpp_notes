@@ -70,12 +70,13 @@ try {											//try/catch function形式，将整个main包起来
 		using zmq_ctx = ZmqContext<1>;
 		auto sock = zmq_ctx::recv_sock();		//获取zmq的接收sock，并根据配置绑定接收端口
 		sock.bind(conf.get<string>("config.zmq_ipc_addr"));
+		assert(sock.handle() != nullptr);
 
 		for (;;)								//服务器无限循环运行
 		{
 			auto msg_ptr =						//把即将获取的数据包封装进智能指针
 				std::make_shared<zmq_message_type>();
-			sock.recv(msg_ptr.get());			//接收数据，阻塞模式
+			sock.recv(*msg_ptr.get());			//接收数据，阻塞模式
 
 			++count;							//计数
 

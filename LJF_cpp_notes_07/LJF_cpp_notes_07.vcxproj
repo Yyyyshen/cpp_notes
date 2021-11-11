@@ -78,8 +78,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)\third-party\msgpack\include;$(ProjectDir)\third-party\lua\include;$(ProjectDir)\third-party\zmq\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\third-party\lua\lib;$(ProjectDir)\third-party\zmq\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\boost_1_75_0;$(ProjectDir)\third-party\msgpack\include;$(ProjectDir)\third-party\lua\include;$(ProjectDir)\third-party\zmq\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\boost_1_75_0\stage\lib;$(ProjectDir)\third-party\lua\lib;$(ProjectDir)\third-party\zmq\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
