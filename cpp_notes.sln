@@ -21,6 +21,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LJF_cpp_notes_06", "LJF_cpp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LJF_cpp_notes_07", "LJF_cpp_notes_07\LJF_cpp_notes_07.vcxproj", "{FE7662DC-61D3-4EED-8F6D-D107DBD38F4E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cpp_primer", "cpp_primer", "{B524504D-3ACC-4283-8273-78BA6F6B89EC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cpp_standard", "cpp_standard", "{EC8E5CD3-E977-48F1-A5BB-AE14F4402550}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cpp_object_model", "cpp_object_model", "{849C548D-B8C3-4C9A-8A78-C53AA6D0BCE5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpp_standard_01", "cpp_standard_01\cpp_standard_01.vcxproj", "{21A0B6D3-581E-40F1-AEA0-AABAB725C94D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -93,6 +101,14 @@ Global
 		{FE7662DC-61D3-4EED-8F6D-D107DBD38F4E}.Release|x64.Build.0 = Release|x64
 		{FE7662DC-61D3-4EED-8F6D-D107DBD38F4E}.Release|x86.ActiveCfg = Release|Win32
 		{FE7662DC-61D3-4EED-8F6D-D107DBD38F4E}.Release|x86.Build.0 = Release|Win32
+		{21A0B6D3-581E-40F1-AEA0-AABAB725C94D}.Debug|x64.ActiveCfg = Debug|x64
+		{21A0B6D3-581E-40F1-AEA0-AABAB725C94D}.Debug|x64.Build.0 = Debug|x64
+		{21A0B6D3-581E-40F1-AEA0-AABAB725C94D}.Debug|x86.ActiveCfg = Debug|Win32
+		{21A0B6D3-581E-40F1-AEA0-AABAB725C94D}.Debug|x86.Build.0 = Debug|Win32
+		{21A0B6D3-581E-40F1-AEA0-AABAB725C94D}.Release|x64.ActiveCfg = Release|x64
+		{21A0B6D3-581E-40F1-AEA0-AABAB725C94D}.Release|x64.Build.0 = Release|x64
+		{21A0B6D3-581E-40F1-AEA0-AABAB725C94D}.Release|x86.ActiveCfg = Release|Win32
+		{21A0B6D3-581E-40F1-AEA0-AABAB725C94D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -105,6 +121,7 @@ Global
 		{FAE7E9FB-3F89-4B26-85B6-81D750A87425} = {A538F72B-B63A-4B31-954F-D76D20421305}
 		{FA6DE321-3B78-4B8D-A1E7-04BDFF677508} = {A538F72B-B63A-4B31-954F-D76D20421305}
 		{FE7662DC-61D3-4EED-8F6D-D107DBD38F4E} = {A538F72B-B63A-4B31-954F-D76D20421305}
+		{21A0B6D3-581E-40F1-AEA0-AABAB725C94D} = {EC8E5CD3-E977-48F1-A5BB-AE14F4402550}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E565ADE4-3CD2-4332-93B5-4D52C1466262}
