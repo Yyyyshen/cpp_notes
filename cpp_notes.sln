@@ -31,6 +31,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpp_standard_01", "cpp_stan
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpp_standard_02", "cpp_standard_02\cpp_standard_02.vcxproj", "{84D27F64-67FB-400D-8C6E-69DF1F15FC4B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cpp_standard_03", "cpp_standard_03\cpp_standard_03.vcxproj", "{2215ABF3-C4CE-4B04-B06D-05CC9DD58C0E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -119,6 +121,14 @@ Global
 		{84D27F64-67FB-400D-8C6E-69DF1F15FC4B}.Release|x64.Build.0 = Release|x64
 		{84D27F64-67FB-400D-8C6E-69DF1F15FC4B}.Release|x86.ActiveCfg = Release|Win32
 		{84D27F64-67FB-400D-8C6E-69DF1F15FC4B}.Release|x86.Build.0 = Release|Win32
+		{2215ABF3-C4CE-4B04-B06D-05CC9DD58C0E}.Debug|x64.ActiveCfg = Debug|x64
+		{2215ABF3-C4CE-4B04-B06D-05CC9DD58C0E}.Debug|x64.Build.0 = Debug|x64
+		{2215ABF3-C4CE-4B04-B06D-05CC9DD58C0E}.Debug|x86.ActiveCfg = Debug|Win32
+		{2215ABF3-C4CE-4B04-B06D-05CC9DD58C0E}.Debug|x86.Build.0 = Debug|Win32
+		{2215ABF3-C4CE-4B04-B06D-05CC9DD58C0E}.Release|x64.ActiveCfg = Release|x64
+		{2215ABF3-C4CE-4B04-B06D-05CC9DD58C0E}.Release|x64.Build.0 = Release|x64
+		{2215ABF3-C4CE-4B04-B06D-05CC9DD58C0E}.Release|x86.ActiveCfg = Release|Win32
+		{2215ABF3-C4CE-4B04-B06D-05CC9DD58C0E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -133,6 +143,7 @@ Global
 		{FE7662DC-61D3-4EED-8F6D-D107DBD38F4E} = {A538F72B-B63A-4B31-954F-D76D20421305}
 		{21A0B6D3-581E-40F1-AEA0-AABAB725C94D} = {EC8E5CD3-E977-48F1-A5BB-AE14F4402550}
 		{84D27F64-67FB-400D-8C6E-69DF1F15FC4B} = {EC8E5CD3-E977-48F1-A5BB-AE14F4402550}
+		{2215ABF3-C4CE-4B04-B06D-05CC9DD58C0E} = {EC8E5CD3-E977-48F1-A5BB-AE14F4402550}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E565ADE4-3CD2-4332-93B5-4D52C1466262}
