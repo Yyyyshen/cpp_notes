@@ -108,6 +108,55 @@ test_shared_ptr()
 // 
 //
 
+//
+//数值极值
+// numeric_limits
+// 利用这个实现平台无关的代码
+//
+
+//
+//type trait/utility
+// 检验类型
+// std::ref 隐式转换为T&
+// std::function 
+//
+
+//
+//辅助函数
+// min/max，可自定义比较函数
+// swap交换
+// ratio 编译期分数运算
+//
+// clock、timer
+#include <chrono>
+void
+test_chrono()
+{
+	//duration 时间段
+	std::chrono::duration<int> twenty_sec(20);//默认“分数”以秒记单位
+	std::chrono::duration<double, std::ratio<60>> half_min(0.5);
+	std::chrono::duration<long, std::ratio<1, 1000>> one_mill_sec(1);//毫秒ms
+	//但有些麻烦，标准库定义了一些常用单位
+	std::chrono::seconds twenty_sec2(20);
+	std::chrono::hours one_day(24);
+	std::chrono::microseconds one_micro_sec(1);//微秒（nano纳秒）
+
+	//clock和timepoint
+	auto tp_now = std::chrono::system_clock::now();//程序执行到现在的开始时间；返回类型是time_point
+
+}
+//
+//<cstddef> 
+// nullptr_t,size_t,ptrdiff_t(指针间距离)
+// 
+//<cstdlib>
+// exit(),abort()
+//  
+//<cstring>
+// memchr,memcmp,memcpy,memmove,memset
+// 
+//
+
 int main()
 {
 	std::cout << "Hello World!\n";
