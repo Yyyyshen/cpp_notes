@@ -261,3 +261,9 @@ int maxEnvelopes(vector<vector<int>>& envelopes) {
 int networkDelayTime(vector<vector<int>>& times, int n, int k) {
 	
 }
+
+
+//
+//机考第三题详情
+// 
+//
