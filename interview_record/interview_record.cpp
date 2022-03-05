@@ -34,7 +34,9 @@
 // 安恒 HR反馈 周一下午两点电面
 //
 
+#include "huawei_od.hpp"
 int main()
 {
-    std::cout << "Hello World!\n";
+    longest_broadcast_response solution;
+    solution.run();
 }

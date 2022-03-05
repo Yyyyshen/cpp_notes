@@ -1,10 +1,14 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
 #include <stack>
 #include <string>
 #include <algorithm>
 #include <unordered_set>
+#include <map>
+#include <unordered_map>
+#include <queue>
 using namespace std;
 
 //
@@ -259,11 +263,276 @@ int maxEnvelopes(vector<vector<int>>& envelopes) {
 
 //网络延迟时间（medium） /problems/network-delay-time/
 int networkDelayTime(vector<vector<int>>& times, int n, int k) {
-	
+	vector<pair<int, int>> adj[101];
+	//把输入转为邻接表
+	for (auto time : times)
+		adj[time[0]].push_back({ time[2],time[1] });
+	//广度优先搜索
+	vector<int> memo(n + 1, INT_MAX);
+	queue<int> q;
+	q.push(k);
+	memo[k] = 0;
+	while (!q.empty())
+	{
+		int cur = q.front();
+		q.pop();
+		for (auto edge : adj[cur])
+		{
+			int delay = edge.first;
+			int next = edge.second;
+			if (memo[next] > memo[cur] + delay)
+			{
+				memo[next] = memo[cur] + delay;
+				q.push(next);
+			}
+		}
+	}
+	int ret_bfs = INT_MIN;
+	for (int i = 1; i <= n; ++i)
+		ret_bfs = max(ret_bfs, memo[i]);
+	return ret_bfs == INT_MAX? -1:ret_bfs;
 }
+
+//搜索单词（medium） /problems/word-search/
+class word_search {
+public:
+	bool exist(vector<vector<char>>& board, string word) {
+		int m = board.size();
+		int n = board[0].size();
+
+		for (int i = 0; i < m; ++i)
+			for (int j = 0; j < n; ++j)
+				if (dfs(i, j, m, n, board, word, 0))
+					return true;
+
+		return false;
+	}
+
+	bool dfs(int i, int j, int m, int n,
+		vector<vector<char>>& board,
+		const string& word,
+		int len)
+	{
+		if (word[len] == '\0')
+			return true;
+		if (i < 0 || i >= m || j < 0 || j >= n
+			|| len >= word.size() || word[len] != board[i][j])
+			return false;
+		bool ret = false;
+		char tmp = board[i][j];
+		board[i][j] = '*';
+
+		ret = dfs(i - 1, j, m, n, board, word, len + 1)
+			|| dfs(i + 1, j, m, n, board, word, len + 1)
+			|| dfs(i, j - 1, m, n, board, word, len + 1)
+			|| dfs(i, j + 1, m, n, board, word, len + 1);
+
+		board[i][j] = tmp;
+		return ret;
+	}
+};
+
+//最大数（medium） /problems/largest-number
+class largest_number {
+public:
+	struct string_cmp {
+		bool operator()(const string& a, const string& b)
+		{
+			//排序巧妙解决了哪个放前面更大，还避免了有0时的默认比较错误
+			return a + b < b + a;
+		}
+	};
+	string largestNumber(vector<int>& nums) {
+		priority_queue<string, vector<string>, string_cmp> q;
+		for (auto num : nums)
+			q.push(to_string(num));
+		string ret;
+		while (!q.empty())
+		{
+			ret += q.top();
+			q.pop();
+		}
+		//把前面多余的0去除，针对全0情况
+		while (ret[0] == '0' && ret.size() > 1)
+			ret = ret.substr(1);
+		return ret;
+	}
+};
+
+//矩形面积（medium） /problems/rectangle-area
+class rectangle_area {
+public:
+	bool CheckOverlap(int rec1L, int rec1D, int rec1R, int rec1T,
+		int rec2L, int rec2D, int rec2R, int rec2T)
+	{
+		return (min(rec1R, rec2R) > max(rec1L, rec2L) && min(rec1T, rec2T) > max(rec1D, rec2D));
+	}
+
+	int computeArea(int rec1L, int rec1D, int rec1R, int rec1T,
+		int rec2L, int rec2D, int rec2R, int rec2T)
+	{
+
+		int rec1Area = (rec1R - rec1L) * (rec1T - rec1D);
+		int rec2Area = (rec2R - rec2L) * (rec2T - rec2D);
+
+		bool f = CheckOverlap(rec1L, rec1D, rec1R, rec1T,
+			rec2L, rec2D, rec2R, rec2T);
+
+		if (!f) return rec1Area + rec2Area;
+
+		int h = min(rec1T, rec2T) - max(rec1D, rec2D);
+		int w = min(rec1R, rec2R) - max(rec1L, rec2L);
+
+		return rec1Area + rec2Area - h * w;
+	}
+};
+
+//根据字符出现频率排序（medium） /problems/sort-characters-by-frequency
+class sort_char_by_frequency {
+public:
+	using pair_type = pair<char, int>;
+	struct pair_cmp {
+		bool operator()(const pair_type& a, const pair_type& b)
+		{
+			return a.second < b.second;
+		}
+	};
+	string frequencySort(string s) {
+		unordered_map<char, int> memo;
+		for (auto c : s)
+			memo[c]++;
+		priority_queue<pair_type, vector<pair_type>, pair_cmp> q;
+		for (auto pair : memo)
+			q.push(pair);
+		string ret;
+		while (!q.empty())
+		{
+			pair_type top = q.top();
+			q.pop();
+			for (int i = 0; i < top.second; ++i)
+				ret += top.first;
+		}
+		return ret;
+	}
+	//更巧妙的写法，不用自己写比较函数
+	string smart(string s)
+	{
+		unordered_map<char, int> freq;           //for frequency of characters
+		priority_queue<pair<int, char>> maxheap; //maxheap according to frequency of characters
+		for (char c : s)
+			freq[c]++;
+		for (auto it : freq)
+			maxheap.push({ it.second,it.first }); //heap will be constructed on the basis of frequency
+		s = "";
+		while (!maxheap.empty()) {
+			s += string(maxheap.top().first, maxheap.top().second); //frequency times the character
+			maxheap.pop();
+		}
+		return s;
+	}
+};
 
 
 //
 //机考第三题详情
 // 
+//最长广播响应
+// 某通信网络中有N个网络节点，用1到N标识，网络中节点相互联通，节点间消息传递延迟为一个时间单位（无权有向图）
+// 现给定网络节点 link[i] = u,v ，u和v表示网络节点
+// 当指定节点发出广播，所有广播节点收到消息后都会在原路回复响应，计算至少需要几个等待时间才能收到所有节点响应
+// （到每个节点的最短时间 * 2）
+// 
+// 注：
+// N 范围 [1,1000]
+// 连接link长度不超过3000，且 1 < u,v < N
+// 网络中任意节点可达
+// 
+// 输入：
+// 5 7 （第一行表示有5个节点，7组节点连接信息）
+// 2 1 （从节点2->节点1）
+// 2 3
+// 1 4
+// 2 4
+// 4 5
+// 3 5
+// 3 4
+// 2   （从节点2发送广播）
+// 
+// 输出：
+// 4 
+//
+class longest_broadcast_response
+{
+public:
+	//邻接表
+	vector<int> adj[1001];//N范围（如果网络延迟不同，用pair记录权重）
+	void run()
+	{
+		int N, I;//N个节点，I组链接
+		while (cin >> N >> I)
+		{
+			int u, v;//链接两端
+			for (int i = 0; i < I; ++i)
+			{
+				cin >> u >> v;
+				adj[u].push_back(v);
+			}
+			int k;//广播节点
+			cin >> k;
+
+			vector<int> memo_dfs(N + 1, INT_MAX);//记录到每个节点的最短时间
+			int ret_dfs = INT_MIN;
+			dfs(memo_dfs, k, 0);
+			for (int i = 1; i <= N ; ++i)
+				ret_dfs = max(memo_dfs[i], ret_dfs);
+
+			vector<int> memo_bfs(N + 1, INT_MAX);
+			int ret_bfs = INT_MIN;
+			bfs(memo_bfs, k);
+			for (int i = 1; i <= N; ++i)
+				ret_bfs = max(memo_bfs[i], ret_bfs);
+
+			cout << "dfs_ret: " << ret_dfs * 2 << endl;
+			cout << "bfs_ret: " << ret_bfs * 2 << endl;
+		}
+	}
+private:
+	//深度优先搜索方法
+	void dfs(vector<int>& memo, int node, int delay)
+	{
+		//已经比当前记录过的时间更长就没必要再找下去了
+		if (delay >= memo[node])
+			return;
+		//记录到此节点的时间
+		memo[node] = delay;
+		//从当前节点能够到达的节点依次往深处搜索
+		for (auto edge : adj[node])
+			dfs(memo, edge, delay + 1);
+	}
+	//广度优先搜索方法
+	void bfs(vector<int>& memo, int node)
+	{
+		//建立一个队列准备存放当前遍历层节点
+		queue<int> q;
+		q.push(node);
+		//节点自身时间为0
+		memo[node] = 0;
+		//开始出入队
+		while (!q.empty())
+		{
+			//每个节点出队同时把其后层节点加入队列
+			int cur = q.front();
+			q.pop();
+			for (auto edge : adj[cur])
+			{
+				//到达时间更长的就不用入队了
+				if (memo[edge] > memo[cur] + 1)
+				{
+					memo[edge] = memo[cur] + 1;
+					q.push(edge);
+				}
+			}
+		}
+	}
+};
 //
