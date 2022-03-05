@@ -290,7 +290,7 @@ int networkDelayTime(vector<vector<int>>& times, int n, int k) {
 	int ret_bfs = INT_MIN;
 	for (int i = 1; i <= n; ++i)
 		ret_bfs = max(ret_bfs, memo[i]);
-	return ret_bfs == INT_MAX? -1:ret_bfs;
+	return ret_bfs == INT_MAX ? -1 : ret_bfs;
 }
 
 //搜索单词（medium） /problems/word-search/
@@ -432,6 +432,119 @@ public:
 	}
 };
 
+//基本计算器（medium） /problems/basic-calculator-ii
+class basic_calculator {
+public:
+	int calculate(string s) {
+		if (s.empty()) return 0;
+		vector<int> cal;
+		char pre_op = '+';
+		int cur_num = 0;
+		for (int i = 0; i < s.size(); ++i)
+		{
+			if (isdigit(s[i]))
+				cur_num = 10 * cur_num + (s[i] - '0');
+			//不是数字和空格，也就是操作符号，或者到结尾了，判断上一个操作符是什么
+			if (!isdigit(s[i]) && !isspace(s[i]) || i == s.size() - 1)
+			{
+				if (pre_op == '+')
+					cal.push_back(cur_num);
+				if (pre_op == '-')
+					cal.push_back(-cur_num);
+				if (pre_op == '*')
+				{
+					int top = cal.back();
+					cal.pop_back();
+					cal.push_back(top * cur_num);
+				}
+				if (pre_op == '/')
+				{
+					int top = cal.back();
+					cal.pop_back();
+					cal.push_back(top / cur_num);
+				}
+				//计算一次后清零，记录本次操作符
+				cur_num = 0;
+				pre_op = s[i];
+			}
+		}
+		//剩下的数字相加即可（减法已经处理成负号）
+		int ret = 0;
+		for (auto num : cal)
+			ret += num;
+		return ret;
+	}
+};
+
+//岛屿数量（medium） /problems/number-of-islands
+class islands_number {
+public:
+	int numIslands(vector<vector<char>>& grid) {
+		int count = 0;
+		for (int i = 0; i < grid.size(); i++) {
+			for (int j = 0; j < grid[0].size(); j++) {
+				if (grid[i][j] == '1') {
+					dfs(grid, i, j);
+					count++;
+				}
+			}
+		}
+		return count;
+	}
+	void dfs(vector<vector<char>>& grid, int i, int j) {
+		if (i < 0 || j < 0 || i >= grid.size() || j >= grid[0].size() || grid[i][j] == '0')
+			return;
+		// set to 0 (visited)
+		grid[i][j] = '0';
+		// search surrounding cells at horizontal/vertical
+		dfs(grid, i + 1, j);
+		dfs(grid, i, j + 1);
+		dfs(grid, i - 1, j);
+		dfs(grid, i, j - 1);
+	}
+};
+
+//三数之和（medium） /problems/3sum
+class three_sum {
+public:
+	vector<vector<int>> threeSum(vector<int>& nums) {
+		vector<vector<int>> ret;
+		int n = nums.size();
+		sort(nums.begin(), nums.end());
+		for (int index1 = 0; index1 + 2 < n/* 后面还有两个索引，空出来 */; ++index1)
+		{
+			if (index1 > 0 && nums[index1] == nums[index1 - 1])
+				continue;//去重左边部分
+			int index2 = index1 + 1, index3 = n - 1;
+			while (index2 < index3)
+			{
+				int sum = nums[index1] + nums[index2] + nums[index3];
+				if (sum == 0)
+				{
+					ret.push_back({ nums[index1],nums[index2],nums[index3] });
+					//去重右边部分
+					--index3;
+					while ((index2 < index3) && (nums[index3] == nums[index3 + 1])) --index3;
+				}
+				else if (sum < 0)//和太小，说明左边的太小，后移
+					++index2;
+				else //和太大，说明右边太大，前移
+					--index3;
+			}
+		}
+
+		return ret;
+	}
+};
+
+//排列序列（hard） /problems/permutation-sequence
+class permutation_sequence{
+public:
+	string getPermutation(int n, int k) {
+
+	}
+};
+
 
 //
 //机考第三题详情
@@ -483,7 +596,7 @@ public:
 			vector<int> memo_dfs(N + 1, INT_MAX);//记录到每个节点的最短时间
 			int ret_dfs = INT_MIN;
 			dfs(memo_dfs, k, 0);
-			for (int i = 1; i <= N ; ++i)
+			for (int i = 1; i <= N; ++i)
 				ret_dfs = max(memo_dfs[i], ret_dfs);
 
 			vector<int> memo_bfs(N + 1, INT_MAX);
