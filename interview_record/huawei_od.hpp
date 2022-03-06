@@ -538,10 +538,116 @@ public:
 };
 
 //排列序列（hard） /problems/permutation-sequence
-class permutation_sequence{
+class permutation_sequence {
 public:
 	string getPermutation(int n, int k) {
+		//准备1到n的数组（或字符串）
+		// 假设 n = 4 , k = 15
+		// 1到4排列有24种，以第一个数字为例
+		// 1到4每个数字开头分别有6种，也就是(n-1)!种
+		//每个数字的选择
+		// 第15个数字，除以每个数字开头6种，结果2
+		// 也就是字符串中索引为2的数字'3'
+		// 确定第一个数字为3，其余数字剩 '124'
+		// 第二个数字选择是3个数字中选择，总共6种，每个数字开头分别2种
+		// 之前15与6除找到第一个数字，取模结果3，即剩下6种里再取第3个
+		// 第3个数字，除以每个数字2种，结果1
+		// 也就是字符串中索引为1的数字'2'，当前排列 '32'
+		// 确认第二个数字后，其余数字剩 '14'
+		// 第三个数字是2个数字中选择，总共2种，每个数字开头分别1种
+		// 3与2取模结果1，也就是剩下两种取第1个
+		// '321' 剩余 '4'
+		// 加上剩余一个字符 '3214'
+		//
+		if (n == 1) return "1";
+		//准备好所有阶乘数
+		vector<int> fac(n + 1, 1);
+		for (int i = 1; i <= n; ++i)
+			fac[i] = i * fac[i - 1];
+		//结果与备选字符
+		string ret;
+		vector<int> numbers;
+		for (int i = 1; i <= n; ++i)
+			numbers.push_back(i);
+		//递归选择每个数字
+		setPerm(numbers, ret, n, k, fac);
+		return ret;
+	}
+	void setPerm(vector<int>& numbers, string& ret, int n, int k, vector<int>& fac)
+	{
+		if (n == 1)
+		{
+			//只剩最后一个了，直接加
+			ret += to_string(numbers.back());
+			return;
+		}
+		//每个字符开头有(n-1)!种，用k除以它去找
+		int index = k / fac[n - 1];
+		//如果刚好整除，则应该是第0个
+		if (k % fac[n - 1] == 0)
+			--index;
+		//拼接当前数字并从候选中去掉
+		ret += to_string(numbers[index]);
+		numbers.erase(numbers.begin() + index);
+		//下一个选择时，就是从n-1个数字中求第选完当前数字后的第k个
+		k -= fac[n - 1] * index;
+		//递归这个逻辑
+		setPerm(numbers, ret, n - 1, k, fac);
+	}
+};
 
+//烂橘子（medium） /problems/rotting-oranges/ 
+class rott_orange {
+public:
+	int orangesRotting(vector<vector<int>>& grid) {
+		//由于可能刚开始存在多个烂橘子，所以应该是从所有烂橘子开始广度优先搜索，而不是dfs
+		int m = grid.size();
+		int n = grid[0].size();
+		//bfs使用队列
+		queue<pair<int, int>> q;
+		//烂橘子入队准备搜索，并统计新鲜橘子数
+		int fresh = 0;
+		for (int i = 0; i < m; ++i)
+		{
+			for (int j = 0; j < n; ++j)
+			{
+				if (grid[i][j] == 2)
+					q.push({ i,j });
+				if (grid[i][j] == 1)
+					++fresh;
+			}
+		}
+		//开始搜索
+		vector<int> dir = { -1,0,1,0,-1 };//用于四个方向扩散的辅助数组
+		int ret = -1;//第一次搜索是原本存在的烂橘子，+1后是0开始
+		while (!q.empty())
+		{
+			int size = q.size();
+			while (size-- > 0)
+			{
+				auto rott = q.front();
+				q.pop();
+				//往四个方向腐烂
+				for (int i = 0; i < 4; ++i)
+				{
+					int x = rott.first + dir[i];
+					int y = rott.second + dir[i + 1];
+					//在范围内且为新鲜橘子才继续扩散
+					if (x >= 0 && x < m && y >= 0 && y < n && grid[x][y] == 1)
+					{
+						grid[x][y] = 2;
+						q.push({ x,y });
+						--fresh;//记录被影响的橘子
+					}
+				}
+			}
+			++ret;
+		}
+		//如果还有新鲜橘子，则是永远不会被影响
+		if (fresh > 0) return -1;
+		//没有没有橘子，返回0
+		if (ret == -1) return 0;
+		return ret;
 	}
 };
 
