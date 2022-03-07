@@ -119,6 +119,53 @@ using namespace std;
 //3.7 技术1面
 // welink会议面试 晚上七点
 // 机考题第三题又复盘了一下，另外回顾一些底层知识
+// 
+//一道算法题开场
+// 最大连续0的个数
+// 一个数组含有0和1，可把k个0替换为1，问最大连续0的个数
+int longestZeros(vector<int>& A, int k)
+{
+	//滑动窗口
+	int left = 0, right = 0, ret = 0;
+	int size = A.size();
+	//记录1的个数
+	int ones = 0;
+	while (right < size) {
+		//如果往右滑动过程中，是1则可替换，计数
+		if (A[right] == 1)
+			++ones;
+		//可替换数超过指定数，则缩短窗口
+		while (ones > k)
+			if (A[left++] == 1)
+				--ones;
+		//整个窗口记录的是包含小于等于k个1窗口
+		ret = max(ret, right - left + 1);
+		++right;
+	}
+	return ret;
+}
+// 思路讲解完开始面试
+// 
+//面试问题
+// 项目相关，难点解决
+// 
+// io复用，select、poll、epoll区别
+// tcp协议、流量控制
+// domain socket
+// 内存屏障（编译器优化，指令乱序）
+// CAS原语
+// 协程和线程的区别
+// 缓存
+// 内存置换
+// malloc申请后不写不占用物理内存
+// 寄存器有哪些
+// 参数入哪个寄存器
+// linux常用命令 readelf objdump
+// gcc命令
+// shell命令
+// 堆排序
+// 
+//有少部分没有答上来，等HR反馈
 //
 
 //
