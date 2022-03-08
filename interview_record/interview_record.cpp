@@ -55,7 +55,6 @@
 #include "huawei_od.hpp"
 int main()
 {
-    decode_string test;
-    auto ret = test.decodeString("3[a]2[bc]");
-    cout << ret << endl;
+    student_attend_record test;
+    test.checkRecord("ALLAPPL");
 }

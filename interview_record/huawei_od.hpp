@@ -949,6 +949,118 @@ public:
 	}
 };
 
+//判断子序列（easy） /problems/is-subsequence
+class sub_seq {
+public:
+	bool isSubsequence(string s, string t) {
+		int i = 0, j = 0;
+		while (i < s.size() && j < t.size())
+		{
+			if (s[i] == t[j])
+				++i, ++j;
+			else
+				++j;
+		}
+		return i == s.size();
+	}
+};
+
+//基本计算器（hard） /problems/basic-calculator
+class calc {
+public:
+	int calculate(string s) {
+		//递归方式
+		int pos = 0;
+		return eval(s, pos);
+	}
+	int eval(string& s, int& pos)
+	{
+		int ret = 0;
+		int sign = 1;
+		for (; pos < s.size(); ++pos)
+		{
+			if (isdigit(s[pos]))
+			{
+				long num = 0;
+				while (pos < s.size() && isdigit(s[pos]))
+					num = num * 10 + s[pos++] - '0';
+				pos--;
+				ret += sign * num;
+				sign = 1;
+			}
+			else if (s[pos] == '-')
+				sign = -1;
+			else if (s[pos] == '(')
+			{
+				ret += sign * eval(s, ++pos);
+				sign = 1;
+			}
+			else if (s[pos] == ')')
+				return ret;
+		}
+		return ret;
+	}
+	//栈方式
+	int calculate_stack(string s) {
+		stack<pair<int, int>> st; // pair(prev_calc_value , sign before next bracket () )
+
+		long long int sum = 0;
+		int sign = +1;
+
+		for (int i = 0; i < s.size(); ++i)
+		{
+			char ch = s[i];
+
+			if (isdigit(ch))
+			{
+				long long int num = 0;
+				while (i < s.size() and isdigit(s[i]))
+				{
+					num = (num * 10) + s[i] - '0';
+					i++;
+				}
+				i--; // as for loop also increase i , so if we don't decrease i here a sign will be skipped
+				sum += (num * sign);
+				sign = +1; // reseting sign
+			}
+			else if (ch == '(')
+			{
+				// Saving current state of (sum , sign) in stack
+				st.push(make_pair(sum, sign));
+
+				// Reseting sum and sign for inner bracket calculation
+				sum = 0;
+				sign = +1;
+			}
+			else if (ch == ')')
+			{
+				sum = st.top().first + (st.top().second * sum);
+				st.pop();
+			}
+			else if (ch == '-')
+			{
+				// toggle sign
+				sign = (-1 * sign);
+			}
+		}
+		return sum;
+	}
+};
+
+//学生出勤记录（easy） /problems/student-attendance-record-i
+class student_attend_record {
+public:
+	bool checkRecord(string s) {
+		int a = 0, l = 0;
+		for (int i = 0; i < s.size(); i++) {
+			if (s[i] == 'A') a++;
+			if (s[i] == 'L') l++;
+			else l = 0;
+			if (a >= 2 || l > 2) return false;
+		}
+		return true;
+	}
+};
 
 
 //
