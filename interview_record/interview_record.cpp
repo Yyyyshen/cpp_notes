@@ -55,6 +55,7 @@
 #include "huawei_od.hpp"
 int main()
 {
-    longest_broadcast_response solution;
-    solution.run();
+    decode_string test;
+    auto ret = test.decodeString("3[a]2[bc]");
+    cout << ret << endl;
 }

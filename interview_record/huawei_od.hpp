@@ -153,12 +153,18 @@ int longestZeros(vector<int>& A, int k)
 // tcp协议、流量控制
 // domain socket
 // 内存屏障（编译器优化，指令乱序）
-// CAS原语
+//  https://blog.csdn.net/GugeMichael/article/details/8207519
+//	知道volatile这个是防止编译器优化的，但没想到是指令乱序和内存屏障这两个词汇相关
+// CAS原语 
+//	http://www.zyiz.net/tech/detail-129644.html
+//	看到过但是忘了
 // 协程和线程的区别
+// 互斥量和自旋锁
 // 缓存
 // 内存置换
-// malloc申请后不写不占用物理内存
+// malloc申请虚拟内存后不写不占用物理内存
 // 寄存器有哪些
+//  寄存器%rdi, %rsi, %rdx, %rcx, %r8, %r9 分别用来保存函数的 6 个参数，而 %rax 用来保存函数的返回值。
 // 参数入哪个寄存器
 // linux常用命令 readelf objdump
 // gcc命令
@@ -703,6 +709,246 @@ public:
 		return ret;
 	}
 };
+
+//最小绝对差（easy） /problems/minimum-absolute-difference
+class min_abs_diff {
+public:
+	vector<vector<int>> minimumAbsDifference(vector<int>& arr) {
+		vector<vector<int>> ret;
+		if (arr.size() < 2) return ret;
+		sort(arr.begin(), arr.end());
+		int min_diff = INT_MAX;
+		for (int i = 0; i < arr.size() - 1; ++i)
+			min_diff = min(min_diff, abs(arr[i + 1] - arr[i]));
+		for (int i = 0; i < arr.size() - 1; ++i)
+			if (abs(arr[i + 1] - arr[i]) == min_diff)
+				ret.push_back({ arr[i],arr[i + 1] });
+		return ret;
+	}
+};
+
+//外观数列（medium） /problems/count-and-say
+class count_and_say {
+public:
+	string countAndSay(int n) {
+		if (n == 0) return "";
+		string ret = "1";
+		while (--n)
+		{
+			string cur;
+			for (int i = 0; i < ret.size(); ++i)
+			{
+				int count = 1;
+				while ((i + 1 < ret.size()) && (ret[i] == ret[i + 1]))
+				{
+					++count;
+					++i;
+				}
+				cur += to_string(count) + ret[i];
+			}
+			ret = cur;
+		}
+		return ret;
+	}
+};
+
+//最大整除子集（medium） /problems/largest-divisible-subset
+class largest_divisible_subset {
+public:
+	vector<int> largestDivisibleSubset(vector<int>& nums) {
+		//先排序
+		sort(nums.begin(), nums.end());
+		int n = nums.size(), max_i = 0;
+		vector<int> dp(n, 1);//记录以第i个数字结尾的最大子集大小，默认为1是因为至少自己可以作为子集
+		vector<int> pre(n, -1);//记录以第i个数组结尾的子集的前一个数字索引，以便重建最大子集
+		vector<int> ret;
+		//以每个数字为结尾，计算符合结果的最大情况
+		for (int i = 1; i < n; ++i)
+		{
+			for (int j = 0; j < i; ++j)
+				if (nums[i] % nums[j] == 0 && dp[i] < dp[j] + 1)
+					dp[i] = dp[j] + 1, pre[i] = j;
+			if (dp[i] > dp[max_i]) max_i = i;
+		}
+		//利用pre记录的前置索引弄出子集
+		while (max_i >= 0)
+		{
+			ret.push_back(nums[max_i]);
+			max_i = pre[max_i];
+		}
+		return ret;
+	}
+};
+
+//省份数量（medium） /problems/number-of-provinces
+class provinces_number {
+public:
+	int findCircleNum(vector<vector<int>>& isConnected) {
+		int n = isConnected.size();
+		//二维邻接矩阵表示的图，以对角线分割两边是一样的，所以只用一维记录即可
+		vector<bool> visited(n, false);
+		int group = 0;
+		for (int i = 0; i < n; ++i)
+		{
+			if (visited[i] == false)
+			{
+				++group;
+				dfs(i, isConnected, visited);
+			}
+		}
+		return group;
+	}
+	void dfs(int i, vector<vector<int>>& isConnected, vector<bool>& visited)
+	{
+		visited[i] = true;
+		for (int j = 0; j < visited.size(); ++j)
+			if (i != j && isConnected[i][j] && !visited[j])
+				dfs(j, isConnected, visited);
+	}
+};
+
+//合并有序数组（easy） /problems/merge-sorted-array
+class merge_sorted_array {
+public:
+	void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
+		int i = m - 1, j = n - 1, target = m + n - 1;
+		while (i >= 0 && j >= 0)
+			nums1[target--] = nums1[i] > nums2[j] ? nums1[i--] : nums2[j--];
+		while (i >= 0)
+			nums1[target--] = nums1[i--];
+		while (j >= 0)
+			nums1[target--] = nums2[j--];
+	}
+};
+
+//第N个泰波那契数（easy） /problems/n-th-tribonacci-number
+class nth_tribonacci {
+public:
+	int tribonacci(int n) {
+		vector<int> trib = { 0,1,1 };
+		if (n < 3) return trib[n];
+		for (int i = 3; i <= n; ++i)
+			trib.push_back(trib[i - 3] + trib[i - 2] + trib[i - 1]);
+		return trib[n];
+	}
+};
+
+//剑指offer45 把数组排成最小数（medium） 
+//https://leetcode-cn.com/problems/ba-shu-zu-pai-cheng-zui-xiao-de-shu-lcof/
+class sort_arr_to_min_num {
+public:
+	struct str_cmp {
+		bool operator()(const string& a, const string& b)
+		{
+			return a + b > b + a;
+		}
+	};
+	string minNumber(vector<int>& nums) {
+		priority_queue<string, vector<string>, str_cmp> q;
+		for (auto& num : nums)
+			q.push(to_string(num));
+		string ret;
+		while (!q.empty())
+		{
+			ret += q.top();
+			q.pop();
+		}
+		return ret;
+	}
+};
+
+//所有蚂蚁掉落的最后时刻（medium） /problems/last-moment-before-all-ants-fall-out-of-a-plank
+class last_momoent {
+public:
+	int getLastMoment(int n, vector<int>& left, vector<int>& right) {
+		// The one that is farthest from the left end, but desires to go in the left
+		// direction, will be the last one to go off of the plank from the left side.
+		int maxLeft = left.empty() ? 0 : *max_element(left.begin(), left.end());
+
+		// Similarly,
+		// The one that is farthest from the right end, but desires to go in the right
+		// direction, will be the last one to go off of the plank from the right side.
+		int minRight = right.empty() ? n : *min_element(right.begin(), right.end());
+
+		// The one among above two would be the last one to off of the plank among all.
+		return max(maxLeft, n - minRight);
+	}
+};
+
+//压缩字符串（medium） /problems/string-compression
+class compress_string {
+public:
+	int compress(vector<char>& chars) {
+		if (chars.size() == 1) return 1;
+		int target = 0, count = 0, index = 0;
+		while (index < chars.size())
+		{
+			chars[target] = chars[index];
+			count = 0;
+			while (index < chars.size() && chars[index] == chars[target])
+			{
+				++index;
+				++count;
+			}
+			if (count == 1)
+				++target;
+			else
+			{
+				string str = to_string(count);
+				for (auto ch : str)
+					chars[++target] = ch;
+				++target;
+			}
+		}
+		return target;
+	}
+};
+
+//解码字符串（medium） /problems/decode-string
+class decode_string {
+public:
+	string decodeString(string s) {
+		int pos = 0;
+		return helper(s, pos);
+	}
+	string helper(string& s, int& pos)
+	{
+		int num = 0;
+		string ret;
+		for (; pos < s.size(); ++pos)
+		{
+			char cur = s[pos];
+			if (isdigit(cur))
+				num = num * 10 + (cur - '0');
+			else if (cur == '[')
+			{
+				string tmp = helper(s, ++pos);
+				while (num-- > 0) ret += tmp;
+				num = 0;
+			}
+			else if (cur == ']')
+				return ret;
+			else
+				ret += cur;
+		}
+		return ret;
+	}
+};
+
+//根据身高重建序列（medium） /problems/queue-reconstruction-by-height
+class queue_rector_by_height {
+public:
+	vector<vector<int>> reconstructQueue(vector<vector<int>>& people) {
+		auto comp = [](const vector<int>& p1, vector<int>& p2)
+		{ return p1[0] > p2[0] || (p1[0] == p2[0] && p1[1]< p2[1]); };
+		sort(people.begin(), people.end(), comp);
+		vector<vector<int>> res;
+		for (auto& p : people)
+			res.insert(res.begin() + p[1], p);
+		return res;
+	}
+};
+
 
 
 //
