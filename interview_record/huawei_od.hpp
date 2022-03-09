@@ -152,23 +152,32 @@ int longestZeros(vector<int>& A, int k)
 // io复用，select、poll、epoll区别
 // tcp协议、流量控制
 // domain socket
+//  https://www.cnblogs.com/sparkdev/p/8359028.html
 // 内存屏障（编译器优化，指令乱序）
 //  https://blog.csdn.net/GugeMichael/article/details/8207519
+//  https://wingsxdu.com/posts/note/cpu-cache-and-memory-barriers/
 //	知道volatile这个是防止编译器优化的，但没想到是指令乱序和内存屏障这两个词汇相关
 // CAS原语 
 //	http://www.zyiz.net/tech/detail-129644.html
+//  http://www.pksure.com/backend/jdk/concurrent-cas
 //	看到过但是忘了
 // 协程和线程的区别
+//  https://www.bilibili.com/read/cv9346691
 // 互斥量和自旋锁
+//  https://www.jianshu.com/p/4b097aac2c9d
 // 缓存
-// 内存置换
+// 内存置换、分页分段
 // malloc申请虚拟内存后不写不占用物理内存
 // 寄存器有哪些
 //  寄存器%rdi, %rsi, %rdx, %rcx, %r8, %r9 分别用来保存函数的 6 个参数，而 %rax 用来保存函数的返回值。
 // 参数入哪个寄存器
+//  https://blog.csdn.net/qq_31917799/article/details/104233427
 // linux常用命令 readelf objdump
+//  https://blog.csdn.net/u014608280/article/details/81948141
 // gcc命令
+//  https://wangchujiang.com/linux-command/c/gcc.html
 // shell命令
+//  https://www.runoob.com/linux/linux-command-manual.html
 // 堆排序
 // 
 //有少部分没有答上来，等HR反馈
