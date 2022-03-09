@@ -940,7 +940,7 @@ class queue_rector_by_height {
 public:
 	vector<vector<int>> reconstructQueue(vector<vector<int>>& people) {
 		auto comp = [](const vector<int>& p1, vector<int>& p2)
-		{ return p1[0] > p2[0] || (p1[0] == p2[0] && p1[1]< p2[1]); };
+		{ return p1[0] > p2[0] || (p1[0] == p2[0] && p1[1] < p2[1]); };
 		sort(people.begin(), people.end(), comp);
 		vector<vector<int>> res;
 		for (auto& p : people)
@@ -1061,6 +1061,602 @@ public:
 		return true;
 	}
 };
+
+//更长的连续段（easy） /problems/longer-contiguous-segments-of-ones-than-zeros
+class longer_ones_than_zeros {
+public:
+	bool checkZeroOnes(string s) {
+		int ones = 0, zeros = 0;
+		int conti_ones = 0, conti_zeros = 0;
+		for (int i = 0; i < s.size(); ++i)
+		{
+			if (s[i] == '0')
+			{
+				conti_ones = max(conti_ones, ones);
+				ones = 0;
+				++zeros;
+			}
+			else
+			{
+				conti_zeros = max(conti_zeros, zeros);
+				zeros = 0;
+				++ones;
+			}
+		}
+		return conti_ones > conti_zeros;
+	}
+};
+
+//全排列（medium） /problems/permutations
+class perm {
+public:
+	vector<vector<int>> permute(vector<int>& nums) {
+		vector<vector<int>> ret;
+		impl(nums, 0, ret);
+		return ret;
+	}
+	void impl(vector<int>& nums, int i, vector<vector<int>>& ret)
+	{
+		if (i == nums.size() - 1)
+			ret.push_back(nums);
+		for (int j = i; j < nums.size(); ++j)
+		{
+			swap(nums[i], nums[j]);
+			impl(nums, i + 1, ret);
+			swap(nums[i], nums[j]);
+		}
+	}
+};
+
+//跳跃游戏（medium） /problems/jump-game-iii
+class jump_game_iii {
+public:
+	bool canReach(vector<int>& arr, int start) {
+		vector<bool> visited(arr.size(), false);
+		return dfs(arr, start, visited);
+	}
+	bool dfs(vector<int>& arr, int i, vector<bool>& visited)
+	{
+		if (i < 0 || i >= arr.size() || visited[i])
+			return false;
+		if (arr[i] == 0) return true;
+		visited[i] = true;
+		return dfs(arr, i + arr[i], visited)
+			|| dfs(arr, i - arr[i], visited);
+	}
+};
+
+//分割数组为连续子串（medium） /problems/split-array-into-consecutive-subsequences
+class split_array_into_subseq {
+public:
+	//我使用了一个贪心算法。
+	//	left 是一个 hashmap，left[i] 计算我还没有放置的 i 的数量。
+	//	end 是一个 hashmap，end[i] 计算以数字 i 结尾的连续子序列的数量
+	//	然后我尝试将数字一一拆分。
+	//	如果我既不能在现有连续子序列的末尾添加一个数字，也不能在左边找到两个后续数字，我返回 False
+	//该解决方案的关键点是，如果存在以 x-1 结尾的有效子序列，
+	// 则将当前 x 放在子序列的末尾总是比创建以 x 开头的新子序列更好/更低的风险，因为它的长度至少为 3。
+	//我认为您必须首先意识到每个数字可以是给定迭代点的序列的开头或结尾。
+	// 这个解决方案的另一个微妙之处是证明附加到先前的序列总是比创建新序列更好。
+	// 考虑问题 [1,2,3,4,5,5,6,7] 以及如何优先创建子序列而不是附加会导致问题。
+	bool isPossible(vector<int>& A) {
+		unordered_map<int, int> left, end;
+		for (int i : A) {
+			left[i]++;
+		}
+		for (int i : A) {
+			if (left[i] == 0) continue;
+			left[i]--;
+			if (end[i - 1] > 0) {
+				end[i - 1]--;
+				end[i]++;
+			}
+			else if (left[i + 1] > 0 && left[i + 2] > 0) {
+				left[i + 1]--;
+				left[i + 2]--;
+				end[i + 2]++;
+			}
+			else {
+				return false;
+			}
+		}
+		return true;
+	}
+};
+
+//排序数组（medium） /problems/sort-an-array
+class sort_array {
+public:
+	vector<int> sortArray(vector<int>& nums) {
+		quick_sort(nums, 0, nums.size() - 1);
+		return nums;
+	}
+	void quick_sort(vector<int>& arr, int start, int end)
+	{
+		if (start >= end)
+			return;
+		int pivot = partition(arr, start, end);
+		if (pivot > start)
+			quick_sort(arr, start, pivot - 1);
+		if (pivot < end)
+			quick_sort(arr, pivot + 1, end);
+	}
+	int partition(vector<int>& arr, int start, int end)
+	{
+		int q = start;
+		for (int i = start; i < end; ++i)
+		{
+			if (arr[i] < arr[end])
+			{
+				swap(arr[i], arr[q]);
+				++q;
+			}
+		}
+		swap(arr[q], arr[end]);
+		return q;
+	}
+};
+
+//最大子序列和（easy） /problems/maximum-subarray
+class max_subarray {
+public:
+	int maxSubArray(vector<int>& nums) {
+		//暴力解
+		int n = size(nums), ans = INT_MIN;
+		for (int i = 0; i < n; i++)
+			for (int j = i, curSum = 0; j < n; j++)
+				curSum += nums[j],
+				ans = max(ans, curSum);
+		return ans;
+		//dp
+		//记录以i结尾的最大子数组和
+		vector<int> dp(nums);
+		for (int i = 1; i < size(nums); i++)
+			dp[i] = max(nums[i], nums[i] + dp[i - 1]);
+		return *max_element(begin(dp), end(dp));
+		//kadane
+		int curMax = 0, maxTillNow = INT_MIN;
+		for (auto c : nums)
+			curMax = max(c, curMax + c),
+			maxTillNow = max(maxTillNow, curMax);
+		return maxTillNow;
+	}
+};
+
+//最接近的三数之和（medium） /problems/3sum-closest
+class three_sum_closest {
+public:
+	int threeSumClosest(vector<int>& nums, int target) {
+		sort(nums.begin(), nums.end());
+		int n = nums.size(), ans = nums[0] + nums[1] + nums[2];
+		for (int i = 0; i < n - 2; ++i) {
+			int l = i + 1, r = n - 1;
+			while (l < r) {
+				int sum3 = nums[i] + nums[l] + nums[r];
+				if (abs(ans - target) > abs(sum3 - target)) // Update better ans
+					ans = sum3;
+				if (sum3 == target) break;
+				if (sum3 > target)
+					--r; // Sum3 is greater than the target, to minimize the difference, we have to decrease our sum3
+				else
+					++l; // Sum3 is lesser than the target, to minimize the difference, we have to increase our sum3
+			}
+		}
+		return ans;
+	}
+};
+
+//连续子数组的和（medium) /problems/continuous-subarray-sum
+class check_subarray_sum {
+public:
+	bool checkSubarraySum(vector<int>& nums, int k) {
+		if (nums.size() < 2)
+			return false;
+
+		//使用map记录到索引i的和的模
+		unordered_map<int, int> umap;
+		umap[0] = -1;
+		int sum = 0;
+		for (int i = 0; i < nums.size(); ++i)
+		{
+			sum += nums[i];
+			sum %= k;
+			//每次取模，之后看有没有模相同的，有说明一定有整除的
+			if (umap.find(sum) != umap.end())
+			{
+				if (i - umap[sum] > 1)
+					return true;
+			}
+			else
+				umap[sum] = i;
+		}
+		return false;
+#if 0
+		//不使用map，但使用一个pre做延迟检查，以便子序列长度至少为2
+		int n = nums.size(), sum = 0, pre = 0;
+		unordered_set<int> modk;
+		for (int i = 0; i < n; ++i) {
+			sum += nums[i];
+			int mod = k == 0 ? sum : sum % k;
+			if (modk.count(mod)) return true;
+			modk.insert(pre);
+			pre = mod;
+		}
+		return false;
+#endif
+	}
+};
+
+//只有两个键的键盘（medium） /problems/2-keys-keyboard
+class two_keys_board {
+public:
+	int minSteps(int n) {
+		//数学解法，素数分解
+		int ans = 0, d = 2;
+		while (n > 1) {
+			while (n % d == 0) {
+				ans += d;
+				n /= d;
+			}
+			d++;
+		}
+		return ans;
+	}
+	//dp解法
+	// dp vector to store <step,value> result for using in future
+	int dp[1001][1001];
+
+	int minKeyPress(int step, int value, int copy, int& n)
+	{
+		// impossible case when step>n or value>n, so return INT_MAX
+		if (step > n || value > n) return INT_MAX;
+
+		// reached target value and so return step 
+		if (value == n) return step;
+
+		// return recalculated value
+		if (dp[step][value] != -1) return dp[step][value];
+
+		// return min step to reach the target value
+		// there are 2 choices: paste copied value with current value => 1 step
+		// copy current value and paste it with itself => 2 step
+		return dp[step][value] = min(minKeyPress(step + 1, value + copy, copy, n), minKeyPress(step + 2, 2 * value, value, n));
+	}
+
+	int minSteps_dp(int n) {
+
+		// base case : n==1 no steps needed
+		if (n == 1) return 0;
+
+		memset(dp, -1, sizeof(dp));
+
+		// start with value 1 and copy 1 and intial step 1 (assuming we already copied the intial value 'A')
+		return minKeyPress(1, 1, 1, n);
+	}
+};
+
+//完成所有工作最短时间（hard） /problems/find-minimum-time-to-finish-all-jobs
+class min_time_finish_jobs {
+public:
+	//这是一个NP完全的多背包问题。因此，严格约束(k <= 12)。
+	//	所以，我们需要做完整的搜索，但我们可以加快一点：
+	//	跟踪当前的最佳结果并使用它进行修剪。
+	//	如果两个或多个工人的工作时间相同，我们只需要考虑其中一个。
+	//	最后的优化有很大帮助，我们可以只使用一个哈希集来跟踪工作时间。
+	//	更新。我最初进行了排序，但后来被删除，因为没有它的解决方案被接受了。
+	//	为了更有效地剪枝，我们可以将作业按降序排序，并计算一个贪心结果，这应该是一个很好的开始。
+	int worker[12] = {}, res = 0;
+	int dfs(vector<int>& jobs, int i, int k, int cur) {
+		if (cur >= res)
+			return res;
+		if (i == jobs.size())
+			return res = cur;
+		unordered_set<int> workTime;
+		for (auto j = 0; j < k; ++j) {
+			if (!workTime.insert(worker[j]).second)
+				continue;
+			worker[j] += jobs[i];
+			dfs(jobs, i + 1, k, max(cur, worker[j]));
+			worker[j] -= jobs[i];
+		}
+		return res;
+	}
+	int minimumTimeRequired(vector<int>& jobs, int k) {
+		if (k == jobs.size())
+			return *max_element(begin(jobs), end(jobs));
+		sort(begin(jobs), end(jobs), greater<int>());
+		for (int i = 0; i < jobs.size(); i += k)
+			res += jobs[i];
+		return dfs(jobs, 0, k, 0);
+	}
+};
+
+//连续整数求和（hard） /problems/consecutive-numbers-sum
+class consecutive_num_sum {
+public:
+	int consecutiveNumbersSum(int N) {
+		//思考过程是这样的
+		// 给定一个数字 N，我们可以把它写成 2 个数字、3 个数字、4 个数字等的总和。让我们假设这个系列中的第一个数字是 x。
+		// 因此，我们应该有
+		//	x + (x + 1) + (x + 2) + ... + k 项 = N
+		//	kx + k * (k - 1) / 2 = N 意味着
+		//	kx = N - k * (k - 1) / 2
+		//	因此，我们可以计算每个 k 值的 RHS，如果它是 k 的倍数，那么我们可以使用从 x 开始的 k 项构造 N 的总和。
+		//	现在，问题出现了，直到我们应该循环获取 k 的值是多少？这很简单。在最坏的情况下，RHS 应该大于 0。即
+		//	N - k * (k - 1) / 2 > 0 这意味着
+		//	k * (k - 1) < 2N 可以近似为
+		//	k * k < 2N ==> k < sqrt(2N)
+		//	因此算法的整体复杂度为 O(sqrt(N))
+		//	PS：OJ 期望答案比可能方式的数量大 1，因为它认为 N 被写为 N 本身。
+		//  这很令人困惑，因为他们要求连续整数的总和，这意味着至少 2 个数字。但是为了取悦OJ，我们应该从1开始数。
+		int count = 1;
+		for (int k = 2; k < sqrt(2 * N); k++) {
+			if ((N - (k * (k - 1) / 2)) % k == 0) count++;
+		}
+		return count;
+	}
+};
+
+//单词接龙（hard） /problems/word-ladder
+class word_ladder {
+public:
+	int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
+
+	}
+};
+
+//找出偶数中包含元音的最长子串（medium） /problems/find-the-longest-substring-containing-vowels-in-even-counts/
+class longest_substring_contain_vowels {
+public:
+
+	//我们不需要知道确切的计数，我们只需要一个指示元音是偶数还是奇数的标志。因此，我们可以使用位掩码跟踪每个元音的状态。由于我们在英文字母表中只有 5 个元音，我们将有 32 种可能的组合。
+	//	现在，如果我们的掩码为零，那么我们的字符串只包含偶数元音。此外，如果索引 i 和 j 的掩码相同，则子字符串[i + 1, j] 的掩码必须为零。因此，子串[i + 1, j] 也只包含偶元音。
+	//	算法
+	//	当我们遍历我们的字符串时，我们更新掩码，并跟踪每个掩码组合的最小索引。如果我们稍后在字符串中遇到相同的掩码，这意味着最小（不包括）和当前（包括）索引之间的字符串符合问题标准。
+	//	换句话说，我们需要找到每个掩码组合的第一个和最后一个索引之间的最大距离。
+	//	请注意，对于零掩码（所有元音的计数都是偶数），第一个索引是 '-1' - 所以我们从一开始就包含字符串。
+	static constexpr char c_m[26] = { 1,0,0,0,2,0,0,0,4,0,0,0,0,0,8,0,0,0,0,0,16,0,0,0,0,0 };
+	int findTheLongestSubstring(string s) {
+		int mask = 0, res = 0;
+		vector<int> m(32, -1);
+		for (int i = 0; i < s.size(); ++i) {
+			mask ^= c_m[s[i] - 'a'];
+			if (mask != 0 && m[mask] == -1)
+				m[mask] = i;
+			res = max(res, i - m[mask]);
+		}
+		return res;
+	}
+};
+
+//移除K个数字（medium） /problems/remove-k-digits
+class remove_K_digit {
+public:
+	//input 1432219 3 output 1219
+	string removeKdigits(string num, int k) {
+		string ans = "";                                         // treat ans as a stack in below for loop
+
+		for (char c : num) {
+			while (ans.length() && ans.back() > c && k) {
+				ans.pop_back();                                  // make sure digits in ans are in ascending order
+				k--;                                             // remove one char
+			}
+
+			if (ans.length() || c != '0') { ans.push_back(c); }  // can't have leading '0'
+		}
+
+		while (ans.length() && k--) { ans.pop_back(); }          // make sure remove k digits in total
+
+		return ans.empty() ? "0" : ans;
+	}
+};
+
+//K进制表示各位总和（easy） /problems/sum-of-digits-in-base-k
+class sum_digits_in_base_k {
+public:
+	int sumBase(int n, int k) {
+		int sum = 0;
+		while (n != 0) sum += n % k, n = n / k;
+		return sum;
+	}
+};
+
+//从前序和中序遍历中构建二叉树（medium） /problems/construct-binary-tree-from-preorder-and-inorder-traversal/
+struct TreeNode {
+	int val;
+	TreeNode* left;
+	TreeNode* right;
+	TreeNode() : val(0), left(nullptr), right(nullptr) {}
+	TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+	TreeNode(int x, TreeNode* left, TreeNode* right) : val(x), left(left), right(right) {}
+
+};
+class ctor_binary_tree {
+public:
+	TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+		if (preorder.empty() || inorder.empty() || preorder.size() != inorder.size())
+			return nullptr;
+		return build(preorder, inorder, 0, preorder.size() - 1, 0, inorder.size() - 1);
+	}
+	TreeNode* build(vector<int>& preorder, vector<int>& inorder, int startpre, int endpre, int startin, int endin)
+	{
+		TreeNode* root = new TreeNode(preorder[startpre]);
+		if (startpre == endpre && startin == endin)
+			if (preorder[startpre] == inorder[startin])
+				return root;
+		int root_inorder = startin;
+		while (root_inorder < endin && inorder[root_inorder] != root->val)
+			++root_inorder;
+		if (root_inorder == endin && inorder[root_inorder] != root->val)
+			return nullptr;
+		int leftlen = root_inorder - startin;
+		int leftendpre = startpre + leftlen;
+		if (leftlen > 0)
+			root->left = build(preorder, inorder, startpre + 1, leftendpre, startin, root_inorder - 1);
+		if (leftlen < endpre - startpre)
+			root->right = build(preorder, inorder, leftendpre + 1, endpre, root_inorder + 1, endin);
+		return root;
+	}
+};
+
+//最大嵌套深度（easy） /problems/maximum-nesting-depth-of-the-parentheses
+class max_depth {
+public:
+	int maxDepth(string s) {
+		int res = 0;
+		int depth = 0;
+		for (int i = 0; i < s.size(); ++i)
+		{
+			if (s[i] == '(')
+				++depth;
+			else if (s[i] == ')')
+				--depth;
+			res = max(depth, res);
+		}
+		return res;
+	}
+};
+
+//相对名次（easy） /problems/relative-ranks
+class relative_ranks {
+public:
+	vector<string> findRelativeRanks(vector<int>& score) {
+		priority_queue<pair<int, int>> q;
+		for (int i = 0; i < score.size(); ++i)
+			q.push({ score[i], i });
+		int i = 0;
+		vector<string> ret(score.size());
+		while (!q.empty())
+		{
+			ret[q.top().second] = i == 0 ? "Gold Medal" : i == 1 ? "Silver Medal" : i == 2 ? "Bronze Medal" : to_string(i + 1);
+			++i;
+			q.pop();
+		}
+		return ret;
+	}
+};
+
+//盛水的最大容器（medium） /problems/container-with-most-water
+class most_water_container {
+public:
+	int maxArea(vector<int>& height) {
+		int water = 0;
+		int i = 0, j = height.size() - 1;
+		while (i < j) {
+			int h = min(height[i], height[j]);
+			water = max(water, (j - i) * h);
+			while (height[i] <= h && i < j) i++;
+			while (height[j] <= h && i < j) j--;
+		}
+		return water;
+	}
+};
+
+//数组中第K个最大元素（medium） /problems/kth-largest-element-in-an-array
+class kth_largest_element {
+public:
+	int findKthLargest(vector<int>& nums, int k) {
+#if 0
+		//排序后遍历k个
+		sort(nums.begin(), nums.end());
+		return nums[nums.size() - k];
+#endif
+		//最小堆
+		priority_queue<int, vector<int>, greater<int>> q;
+		for (auto nums : nums)
+		{
+			q.push(nums);
+			if (q.size() > k) q.pop();//只留k个
+		}
+		return q.top();
+	}
+};
+
+//等于K的子数组和（medium） /problems/subarray-sum-equals-k
+class subarray_sum_equal_k {
+public:
+	int subarraySum(vector<int>& nums, int k) {
+#if 0
+		int count = 0;
+		for (int start = 0; start < nums.size(); start++) {
+			int sum = 0;
+			for (int end = start; end < nums.size(); end++) {
+				sum += nums[end];
+				if (sum == k)
+					count++;
+			}
+		}
+		return count;
+#endif 
+		unordered_map<int, int> mp;
+		int sum = 0, ans = 0;
+		mp[sum] = 1;
+		for (auto it : nums) {
+			sum += it;
+			int find = sum - k;
+			if (mp.find(find) != mp.end())
+				ans += mp[find];
+			mp[sum]++;
+		}
+		return ans;
+	}
+};
+
+//对角线遍历（medium） /problems/diagonal-traverse
+class diagonal_traverse {
+public:
+	vector<int> findDiagonalOrder(vector<vector<int>>& mat) {
+		//分解来做，先只考虑单方向对角线，再隔行反转
+		// Check for empty matrices
+		if (mat.size() == 0) return vector<int>();
+
+		// Variables to track the size of the matrix
+		int N = mat.size();
+		int M = mat[0].size();
+
+		// The two arrays as explained in the algorithm
+		vector<int> result;
+		int k = 0;
+
+		// We have to go over all the elements in the first
+		// row and the last column to cover all possible diagonals
+		for (int d = 0; d < N + M - 1; d++) {
+
+			// Clear the intermediate array every time we start
+			// to process another diagonal
+			vector<int> intermediate;
+
+			// We need to figure out the "head" of this diagonal
+			// The elements in the first row and the last column
+			// are the respective heads.
+			int r = d < M ? 0 : d - M + 1;
+			int c = d < M ? d : M - 1;
+
+			// Iterate until one of the indices goes out of scope
+			// Take note of the index math to go down the diagonal
+			while (r < N && c > -1) {
+
+				intermediate.push_back(mat[r][c]);
+				++r;
+				--c;
+			}
+
+			// Reverse even numbered diagonals. The
+			// article says we have to reverse odd 
+			// numbered articles but here, the numbering
+			// is starting from 0 :P
+			if (d % 2 == 0) {
+				reverse(intermediate.begin(), intermediate.end());
+			}
+
+			for (int i = 0; i < intermediate.size(); i++) {
+				result.push_back(intermediate[i]);
+			}
+		}
+		return result;
+	}
+};
+
 
 
 //

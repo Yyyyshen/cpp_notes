@@ -55,6 +55,6 @@
 #include "huawei_od.hpp"
 int main()
 {
-    student_attend_record test;
-    test.checkRecord("ALLAPPL");
+    remove_K_digit test;
+    test.removeKdigits("1432219", 3);
 }
