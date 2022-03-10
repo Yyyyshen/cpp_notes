@@ -727,7 +727,7 @@ public:
 		}
 		//如果还有新鲜橘子，则是永远不会被影响
 		if (fresh > 0) return -1;
-		//没有没有橘子，返回0
+		//没有橘子，返回0
 		if (ret == -1) return 0;
 		return ret;
 	}
@@ -1449,6 +1449,21 @@ public:
 			res = max(res, i - m[mask]);
 		}
 		return res;
+
+		//会TLE但易于理解的方法
+		unordered_map<char, int>cnt;
+		unordered_map<string, int>mp; mp["00000"] = -1;
+		vector<char>vowels{ 'a','e','i','o','u' };
+		int ans = 0; string temp = "";
+		for (int i = 0; i < s.length(); i++)
+		{
+			char x = s[i]; temp = "";
+			cnt[x]++;
+			for (int j = 0; j < 5; j++) temp += to_string(cnt[vowels[j]] % 2);
+			if (mp.find(temp) != mp.end()) ans = max(ans, i - mp[temp]);
+			else mp[temp] = i;
+		}
+		return ans;
 	}
 };
 
